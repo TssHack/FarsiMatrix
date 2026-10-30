@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { Word, Category, UserProgress, ReviewRating } from '@/types';
-import { playPronunciation } from '@/lib/speech';
+import { canAutoplaySound, playPronunciation } from '@/lib/speech';
 import { fa } from '@/lib/format';
 import { Icon } from './m3/Icon';
 import { Button, IconButton } from './m3/Button';
@@ -90,7 +90,7 @@ export function FlashcardMode({ category, words, progress, onReviewWord, onToggl
 
   // Auto-play pronunciation when a new card appears
   useEffect(() => {
-    if (!autoPlayAudio || !currentWord) return;
+    if (!autoPlayAudio || !currentWord || !canAutoplaySound()) return;
     const timer = setTimeout(speakCurrentWord, 300);
     return () => clearTimeout(timer);
   }, [autoPlayAudio, currentWord, speakCurrentWord]);
@@ -168,7 +168,7 @@ export function FlashcardMode({ category, words, progress, onReviewWord, onToggl
         ariaLabel="فیلتر کارت‌ها"
         value={filterMode}
         onChange={setFilterMode}
-        className="w-full sm:w-auto"
+        className="w-full"
         options={[
           { value: 'all', label: `همه · ${fa(counts.all)}` },
           { value: 'need_review', label: `برای مرور · ${fa(counts.needReview)}` },

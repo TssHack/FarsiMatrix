@@ -11,6 +11,8 @@ import {
   DEFAULT_PROGRESS,
 } from '@/lib/storage';
 import { applyTheme, loadThemeSettings, ThemeSettings } from '@/lib/theme';
+import { initSpeech, SPEECH_UNAVAILABLE_EVENT } from '@/lib/speech';
+import { useSnackbar } from '@/components/m3/Snackbar';
 import { NavigationBar, NavigationRail, TopAppBar } from '@/components/AppShell';
 import { CategoryExplorer } from '@/components/CategoryExplorer';
 import { FlashcardMode } from '@/components/FlashcardMode';
@@ -79,6 +81,26 @@ export default function Home() {
     () => categories.find((c) => c.id === selectedCategoryId) ?? categories.find((c) => c.id === 'computer') ?? categories[0] ?? null,
     [categories, selectedCategoryId]
   );
+
+  const showSnackbar = useSnackbar();
+
+  // Pronunciation engine + a one-time hint when this device can't produce any sound
+  useEffect(() => {
+    initSpeech();
+    let warned = false;
+    const onUnavailable = () => {
+      if (warned) return;
+      warned = true;
+      showSnackbar(
+        navigator.onLine
+          ? 'تلفظ پخش نشد. موتور «متن به گفتار» انگلیسی (Google) را در تنظیمات گوشی فعال کنید.'
+          : 'برای تلفظ آفلاین، موتور «متن به گفتار» انگلیسی را در تنظیمات گوشی نصب کنید یا به اینترنت وصل شوید.',
+        { icon: 'volume_off', duration: 7000 }
+      );
+    };
+    window.addEventListener(SPEECH_UNAVAILABLE_EVENT, onUnavailable);
+    return () => window.removeEventListener(SPEECH_UNAVAILABLE_EVENT, onUnavailable);
+  }, [showSnackbar]);
 
   // Initial data: categories manifest + local progress
   useEffect(() => {
