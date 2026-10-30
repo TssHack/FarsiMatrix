@@ -1,182 +1,249 @@
-# FarsiMatrix 🚀
 <div align="center">
 
-<!-- FarsiMatrix Logo -->
-<svg width="128" height="128" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect rx="6" width="24" height="24" fill="#006874" />
-  <path d="M7 9h10M7 12h10M7 15h6" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
-  <circle cx="17" cy="15" r="1.5" fill="#4dd8ec" />
-</svg>
+<img src="docs/assets/banner.webp" alt="FarsiMatrix — learn specialized English vocabulary with Leitner flashcards, quizzes and pronunciation" width="100%">
 
-### **Modern English ↔ Persian Vocabulary Learning & Spaced Repetition Platform**
-**Designed with Google Material Design 3 (Material You) • Progressive Web App (PWA) • Zero DB Cost Architecture**
+<h1>
+  <img src="public/icons/icon.svg" width="40" height="40" alt="" valign="middle">
+  FarsiMatrix
+</h1>
 
-Over **250,000+ specialized terms** across **51 curated academic & technical domains**
+**Learn specialized English vocabulary in Persian — Leitner flashcards, quizzes and pronunciation, in a Material Design 3 app that works fully offline.**
 
-[Live Web App](https://farsimatrix.ehsanjs.ir) • [Persian README (راهنمای فارسی)](README.fa.md) • [Developer Website](https://ehsanfazli.ir) • [GitHub Repository](https://github.com/TssHack/FarsiMatrix)
+[**Open the live app →**](https://farsimatrix.ehsanfazli.ir) &nbsp;·&nbsp; [راهنمای فارسی](README.fa.md) &nbsp;·&nbsp; [Report a bug](https://github.com/TssHack/FarsiMatrix/issues)
 
----
-
-[![Next.js 16](https://img.shields.io/badge/Next.js-16-black?logo=next.js)](https://nextjs.org)
-[![Material Design 3](https://img.shields.io/badge/Material_Design-3-006874)](https://m3.material.io)
-[![Tailwind CSS v4](https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?logo=tailwind-css)](https://tailwindcss.com)
-[![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue?logo=typescript)](https://www.typescriptlang.org)
-[![PWA](https://img.shields.io/badge/PWA-Offline_Ready-purple)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
-[![Database Cost](https://img.shields.io/badge/DB_Cost-Zero_Dollar-success)](#architecture--zero-db-cost)
-[![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg)](LICENSE)
+[![Live](https://img.shields.io/website?url=https%3A%2F%2Ffarsimatrix.ehsanfazli.ir&label=live&style=flat-square&color=006a6a)](https://farsimatrix.ehsanfazli.ir)
+[![Next.js](https://img.shields.io/badge/Next.js-16-000?style=flat-square&logo=nextdotjs)](https://nextjs.org)
+[![React](https://img.shields.io/badge/React-19-149eca?style=flat-square&logo=react&logoColor=white)](https://react.dev)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38bdf8?style=flat-square&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Material 3](https://img.shields.io/badge/Material_Design-3-006a6a?style=flat-square&logo=materialdesign&logoColor=white)](https://m3.material.io)
+[![PWA](https://img.shields.io/badge/PWA-offline_ready-5a0fc8?style=flat-square&logo=pwa&logoColor=white)](#offline-first-pwa)
+[![License](https://img.shields.io/badge/license-MIT-4a6363?style=flat-square)](LICENSE)
 
 </div>
 
 ---
 
-## 🌟 Overview
+## At a glance
 
-**FarsiMatrix** has evolved from a cloud-database dictionary API into an ultra-fast, local-first educational web application. By eliminating external cloud database dependencies (which historically caused heavy bandwidth bills and latency bottlenecks), FarsiMatrix now operates **100% serverless and offline** through optimized category chunking and client-side storage.
+<table>
+  <tr>
+    <td align="center"><b>245,975</b><br><sub>English → Persian entries</sub></td>
+    <td align="center"><b>51</b><br><sub>specialized topics</sub></td>
+    <td align="center"><b>5-box</b><br><sub>Leitner spaced repetition</sub></td>
+    <td align="center"><b>100% offline</b><br><sub>installable PWA</sub></td>
+    <td align="center"><b>$0</b><br><sub>no server, no database, no account</sub></td>
+  </tr>
+</table>
 
-Equipped with an interactive **5-stage Leitner Box (Spaced Repetition)** system, instantaneous **native audio pronunciation**, and dynamic **4-option quiz generation**, FarsiMatrix empowers students, developers, and researchers to memorize and master English vocabulary effortlessly.
+## Screenshots
 
----
+<div align="center">
+<table>
+  <tr>
+    <td><img src="docs/assets/screenshots/mobile-home-light.webp" width="200" alt="Home"></td>
+    <td><img src="docs/assets/screenshots/mobile-flashcard-light.webp" width="200" alt="Flashcard"></td>
+    <td><img src="docs/assets/screenshots/mobile-flashcard-back-dark.webp" width="200" alt="Flashcard back, dark theme"></td>
+    <td><img src="docs/assets/screenshots/mobile-quiz-light.webp" width="200" alt="Quiz"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Home &amp; continue learning</sub></td>
+    <td align="center"><sub>Flashcard</sub></td>
+    <td align="center"><sub>Rate your recall</sub></td>
+    <td align="center"><sub>4-choice quiz</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/assets/screenshots/mobile-quiz-result-dark.webp" width="200" alt="Quiz result"></td>
+    <td><img src="docs/assets/screenshots/mobile-stats-light.webp" width="200" alt="Progress"></td>
+    <td><img src="docs/assets/screenshots/mobile-wordlist-dark.webp" width="200" alt="Dictionary"></td>
+    <td><img src="docs/assets/screenshots/mobile-theme-light.webp" width="200" alt="Dynamic color"></td>
+  </tr>
+  <tr>
+    <td align="center"><sub>Results &amp; mistakes review</sub></td>
+    <td align="center"><sub>Streak &amp; Leitner boxes</sub></td>
+    <td align="center"><sub>Searchable dictionary</sub></td>
+    <td align="center"><sub>Dynamic color picker</sub></td>
+  </tr>
+</table>
 
-## ✨ Key Features
+<img src="docs/assets/screenshots/desktop-home-light.webp" width="49%" alt="Desktop, light theme">
+<img src="docs/assets/screenshots/desktop-flashcard-dark.webp" width="49%" alt="Desktop flashcard, dark theme">
 
-### 🎨 1. Google Material Design 3 (Material You)
-- **Tonal Elevation System**: Replaces flat gray/white with expressive pastel surface layers (`surface-container-low`, `surface-container-high`, etc.).
-- **Dynamic Dark & Light Mode**: Harmonious color palettes conforming strictly to WCAG 2.1 AA accessibility guidelines with a signature Teal/Cyan identity.
-- **RTL & Typography First**: Premium Persian typography powered by Google’s **Vazirmatn** variable font paired seamlessly with clean Latin typefaces.
-- **Responsive down to 360px**: Smooth experience on mobile phones, tablets, foldables, and large desktop screens.
+</div>
 
-### 📚 2. 51 Specialized Learning Domains (250K+ Words)
-- **Computer Science & IT**: Computer Architecture, Algorithms & Data Structures, Information Technology, Internet & Protocols, Programming (VB/General), Computer Graphics, Domains, Modem Errors, Electronics 1-3.
-- **Language & Conversation**: Essential English Words (504, 1100 Words TOEFL/IELTS), Everyday Idioms 1-3, Illustrated Idioms, Chat Slang, Common First Names.
-- **Business & Leadership**: Management 1 & 2, Financial Accounting 1-3, Corporate Law & Jurisprudence.
-- **Science & Medicine**: Mathematics, Statistics & Probability 1 & 2, Biology & Genetics, Astronomy, Physics & Chemistry, Dentistry, Medicinal Plants, Phobias.
-- **Engineering**: Chemical, Industrial 1 & 2, Aviation & Aeronautics, Petroleum Drilling & Refining, Polymer, Textile, Soil Mechanics, Geology, Hydrogeology.
-- **Arts & Media**: Cinema Production, Technical Cinematography, Screenwriting & Film Criticism.
+## Features
 
-### 🗂️ 3. Interactive 3D Leitner Box (Spaced Repetition System)
-- **3D Card Flip**: Realistic perspective card animation triggered by click or keyboard `Space`.
-- **Integrated Native Audio Engine**: Uses browser Web Speech API for real-time natural English pronunciation with zero network delay and zero API costs.
-- **3-Tier Retention Rating**:
-  - 🔴 **Hard / Forgot** (Key `1`) ➔ Returns to Box 1 for rapid review.
-  - 🟡 **Medium / Unsure** (Key `2`) ➔ Retains current interval.
-  - 🟢 **Easy / Mastered** (Key `3`) ➔ Promotes to higher Leitner boxes.
-- **Keyboard Shortcuts**: `Space` (flip), `1`/`2`/`3` (rate), `S` (pronounce), `Arrow Keys` (next/prev).
+### Learn
+- **Leitner flashcards** with a spring-animated 3D flip. Reveal the meaning first, then rate yourself: *didn't know*, *unsure*, or *knew it*. Every rating moves the word between five boxes.
+- **Smart filters**: all cards, only words that need review (boxes 1–2), or your starred words. Cards are tracked by word, so when a word leaves a filter the next one never gets skipped.
+- **Quizzes** in both directions (English → Persian and Persian → English), 5–30 questions, with answers drawn from the same topic, keyboard answers (`1`–`4`), a results gauge and a review of your mistakes.
+- **Dictionary view** for every topic, with search across words and meanings, status filters (new, learning, mastered, starred) and pagination.
+- **Progress dashboard** showing your daily streak, mastered words, quiz accuracy, a Leitner box chart and your most-practised topics.
 
-### 🎯 4. Smart Quiz Generator
-- Rapid 4-choice interactive tests: **English ➔ Persian** or **Persian ➔ English**.
-- Realistic distractors dynamically pulled from the active category.
-- Instant feedback, accuracy scoring, and celebration confetti on completion.
-- Review incorrect answers with direct drill-down back into flashcards.
+### Pronunciation that works on phones
+Mobile browsers make the Web Speech API unreliable, especially in installed PWAs. FarsiMatrix uses a small engine with fallbacks:
 
-### 📱 5. Progressive Web App (PWA) & Local Storage
-- Installable on Android, iOS, Windows, macOS, and Linux as a standalone desktop/mobile app.
-- Full offline caching with custom service worker.
-- Complete data privacy: All bookmarks, Leitner stages, and quiz history stay securely on the user's device with JSON backup/restore capability.
+1. **Device text-to-speech** first: instant and offline. It picks the best English voice, works around Android Chrome's `cancel()`/`speak()` race and the paused state after the app returns from the background, and has a watchdog for engines that never start.
+2. **Recorded dictionary audio** when the device can't speak (online only).
+3. If neither is available, a one-time hint explains how to enable an English TTS voice.
 
----
+Methods that fail are remembered for the session, so a broken path only costs its timeout once.
 
-## 🏗️ Architecture & Zero DB Cost
+### Material Design 3, implemented properly
+- **Dynamic color** generated at runtime with Google's [`material-color-utilities`](https://github.com/material-foundation/material-color-utilities). Choose from 8 Persian-inspired seed colors (turquoise, lapis, saffron, pomegranate…), 4 scheme styles (tonal spot, vibrant, expressive, content), 3 contrast levels, and light/dark/system modes. Custom colors (success, streak flame) are harmonized to your seed.
+- **Adaptive layout**: a navigation bar on phones and a navigation rail with FAB on tablets and desktop. Includes the MD3 type scale tuned for Persian script, shape tokens, tonal surfaces and state layers.
+- **M3 Expressive details**: shape-morphing buttons, a morphing-shape loading indicator, a wavy progress bar, expressive shape containers ("cookie", "clover", "burst"…) and spring motion.
+- **Components**: buttons, icon buttons, filter and assist chips, segmented buttons, dialogs with focus trap, snackbars, switches, linear and circular progress, ripple. All are hand-built on MD3 tokens with Tailwind CSS v4.
+- **RTL-first and accessible**: Vazirmatn typography, Persian numerals everywhere, keyboard support, visible focus, ARIA roles and `prefers-reduced-motion` support.
 
+### Offline-first PWA
+- Installable on Android, iOS, Windows, macOS and Linux, with app shortcuts to *Flashcards* and *Quick quiz*.
+- The service worker serves pages network-first (new releases arrive immediately), word data stale-while-revalidate, and hashed assets, fonts and icons cache-first.
+- Material Symbols are **self-hosted as a ~100 KB subset**, so icons work offline.
+- **Your data stays on your device** in `localStorage`. You can export and import a JSON backup; imports are validated, so a bad file can't corrupt your progress.
+
+## How the Leitner system works
+
+```mermaid
+flowchart LR
+    N([New word]) --> B1[Box 1]
+    B1 -- knew it --> B2[Box 2]
+    B2 -- knew it --> B3[Box 3]
+    B3 -- knew it --> B4[Box 4 · mastered]
+    B4 -- knew it --> B5[Box 5 · permanent]
+    B2 & B3 & B4 & B5 -- "didn't know" --> B1
 ```
-┌────────────────────────────────────────────────────────┐
-│                   FarsiMatrix Client                   │
-│         (Next.js 16 + Tailwind CSS + Material 3)       │
-└───────────────────────────┬────────────────────────────┘
-                            │
-            ┌───────────────┴───────────────┐
-            ▼                               ▼
-┌─────────────────────────┐     ┌────────────────────────┐
-│  Chunked JSON Datasets  │     │   Client Local Store   │
-│  (/public/data/groups/) │     │ (IndexedDB / LocalStg) │
-│ • 51 Category files     │     │ • Leitner Box Stages   │
-│ • Lightweight (~50KB)   │     │ • Starred Bookmarks    │
-│ • Cached by ServiceWkr  │     │ • Daily Streak Tracker │
-└─────────────────────────┘     └────────────────────────┘
+
+*Unsure* keeps a word in its current box. Boxes 1–2 make up the **Needs review** deck, and boxes 4–5 count as **mastered**.
+
+## Keyboard shortcuts
+
+| Key | Flashcards | Quiz |
+| --- | --- | --- |
+| `Space` / `Enter` | Flip card | — |
+| `1` `2` `3` | Didn't know · Unsure · Knew it | Choose option 1–3 |
+| `4` | — | Choose option 4 |
+| `←` / `→` | Next / previous card | — |
+| `S` | Pronounce | — |
+
+Persian keyboard digits (`۱` `۲` `۳` `۴`) work too.
+
+## Architecture
+
+```mermaid
+flowchart TB
+    subgraph Client["Browser · Next.js 16, statically prerendered"]
+        UI[React 19 UI<br/>MD3 component kit]
+        Theme[Dynamic color engine]
+        Speech[Pronunciation engine]
+        Store[(localStorage<br/>progress · theme)]
+        SW[Service worker]
+    end
+    Data[/"public/data/groups/*.json<br/>51 topic files, lazy-loaded"/]
+    UI --> Theme
+    UI --> Speech
+    UI <--> Store
+    UI -- fetch on demand --> SW --> Data
 ```
 
-1. **Category Chunking**: Instead of querying a monolithic 4-million row Postgres instance, the app loads only the category chosen by the user (e.g. `computer.json` is ~60 KB).
-2. **Zero Recurring Infrastructure Fees**: Hosted as static/serverless on Vercel or Cloudflare with zero database server costs.
+There's no backend. Each topic is a separate JSON file that loads only when you open it, and everything you do is saved in the browser. The app can be hosted on any static host for free.
 
----
+## Tech stack
 
-## 🚀 Quick Start
+| Layer | Choice |
+| --- | --- |
+| Framework | Next.js 16 (App Router, Turbopack), React 19 |
+| Language | TypeScript (strict) |
+| Styling | Tailwind CSS v4 mapped to MD3 design tokens |
+| Color | `@material/material-color-utilities` (dynamic color, harmonization) |
+| Icons | Material Symbols Rounded, self-hosted subset |
+| Typography | Vazirmatn via `next/font` |
+| Offline | Custom service worker + Web App Manifest |
+| Effects | `canvas-confetti` (themed to the current palette) |
 
-### Prerequisites
-- Node.js 18+ or 20+
-- npm, yarn, or pnpm
+## Getting started
 
-### Installation
+Requires **Node.js 20.9+**.
+
 ```bash
-# 1. Clone the repository
 git clone https://github.com/TssHack/FarsiMatrix.git
 cd FarsiMatrix
-
-# 2. Install dependencies
 npm install
-
-# 3. Start development server
-npm run dev
+npm run dev          # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+| Script | What it does |
+| --- | --- |
+| `npm run dev` | Development server with hot reload |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
 
-### Production Build
-```bash
-npm run build
-npm run start
-```
+> The service worker registers only in production builds, so development never serves stale bundles.
 
----
+## Project structure
 
-## 📁 Project Structure
-
-```
+```text
 farsimatrix/
 ├── public/
-│   ├── manifest.json              # PWA Web App Manifest
-│   ├── sw.js                      # Service Worker for offline support
-│   ├── icons/                     # PWA maskable and standard icons
-│   └── data/
-│       ├── categories.json        # Manifest for 51 specialized categories
-│       └── groups/                # JSON dictionaries per category
+│   ├── data/
+│   │   ├── categories.json        # 51 topics: titles, cluster, level, word count
+│   │   └── groups/*.json          # one lazy-loaded word file per topic
+│   ├── fonts/                     # self-hosted Material Symbols subset
+│   ├── icons/                     # app icon (SVG master + PNG/maskable sizes)
+│   ├── manifest.json              # PWA manifest with shortcuts
+│   └── sw.js                      # service worker
 ├── src/
 │   ├── app/
-│   │   ├── globals.css            # Material Design 3 tokens & 3D card CSS
-│   │   ├── layout.tsx             # Root layout, Vazirmatn font & RTL setup
-│   │   └── page.tsx               # Main application controller & state
+│   │   ├── globals.css            # MD3 tokens → Tailwind theme, motion, state layers
+│   │   ├── layout.tsx             # fonts, theme boot script, providers
+│   │   └── page.tsx               # app shell, hash routing, data loading
 │   ├── components/
-│   │   ├── Navbar.tsx             # M3 Top App Bar & responsive bottom navigation
-│   │   ├── CategoryExplorer.tsx   # Category browser, M3 filter chips & hero
-│   │   ├── FlashcardMode.tsx      # 3D interactive flip card & Leitner logic
-│   │   ├── QuizMode.tsx           # Multiple choice question generator
-│   │   ├── WordListMode.tsx       # Comprehensive dictionary & quick search
-│   │   ├── StatsView.tsx          # Progress report, streak & JSON backup/restore
-│   │   ├── AboutModal.tsx         # Developer info, repo links & PWA install
-│   │   └── DynamicIcon.tsx        # Dynamic Lucide icon mapper
+│   │   ├── m3/                    # Button, Chip, Dialog, Progress, Shape, Snackbar, Switch…
+│   │   ├── AppShell.tsx           # top app bar, navigation rail & bar
+│   │   ├── CategoryExplorer.tsx   # home: search, continue learning, topics
+│   │   ├── FlashcardMode.tsx      # Leitner flashcards
+│   │   ├── QuizMode.tsx           # quizzes & results
+│   │   ├── WordListMode.tsx       # dictionary list
+│   │   ├── StatsView.tsx          # progress dashboard & backup
+│   │   ├── ThemeDialog.tsx        # dynamic color settings
+│   │   └── AboutModal.tsx
 │   ├── lib/
-│   │   ├── speech.ts              # Browser Web Speech API pronunciation engine
-│   │   └── storage.ts             # LocalStorage & Leitner progression manager
-│   └── types/
-│       └── index.ts               # TypeScript data models
+│   │   ├── theme.ts               # scheme generation & persistence
+│   │   ├── speech.ts              # pronunciation engine
+│   │   ├── storage.ts             # Leitner logic, streak, backup validation
+│   │   ├── icons.ts · format.ts
+│   └── types/index.ts
 └── scripts/
-    ├── build_data.py              # Data sanitizer & category bundler
-    └── generate_icons.py          # High-resolution PWA icon generator
+    ├── build_data.py              # builds categories.json + per-topic word files
+    └── generate_icons.py          # renders the icon set from Vazirmatn's «ف»
 ```
 
----
+## The icon
 
-## 👨‍💻 Author & Developer
+The mark is the Persian letter **«ف»**, drawn from Vazirmatn Bold, with its dot replaced by a **2×2 matrix of flashcard tiles**. One tile is saffron, standing for a word you've learned. To regenerate every size (PNG, maskable, Apple touch icon, favicon):
 
-- **Developer**: **Ehsan Fazli** (احسان فضلی)
-- **Website**: [ehsanfazli.ir](https://ehsanfazli.ir)
-- **GitHub**: [@tsshack](https://github.com/tsshack)
-- **Telegram**: [@devehsan](https://t.me/devehsan)
+```bash
+pip install fonttools          # also needs the resvg and ImageMagick CLIs
+python3 scripts/generate_icons.py /path/to/Vazirmatn-Bold.ttf
+```
 
----
+## Privacy
 
-## 📄 License
-This project is open-source under the [MIT License](LICENSE).
+There are no accounts, no analytics and no server-side storage. The only network requests are the app's own files and, when your device has no working English voice, a recorded pronunciation from a public dictionary audio service (`ssl.gstatic.com`, `dict.youdao.com`).
 
-<div align="center">
-<small>Built with ❤️ for the Persian-speaking developer and learner community — FarsiMatrix</small>
-</div>
+## Contributing
+
+Issues and pull requests are welcome, from new topics and translation fixes to UI polish. Before opening a PR, please run:
+
+```bash
+npx tsc --noEmit && npm run lint && npm run build
+```
+
+## Author
+
+**Ehsan Fazli** (احسان فضلی) — [ehsanfazli.ir](https://ehsanfazli.ir) · GitHub [@TssHack](https://github.com/TssHack) · Telegram [@devehsan](https://t.me/devehsan)
+
+## License
+
+[MIT](LICENSE). If FarsiMatrix helps you learn, a star on the repo is appreciated.
