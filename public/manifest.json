@@ -1,0 +1,33 @@
+{
+  "name": "فارسی ماتریکس | FarsiMatrix",
+  "short_name": "فارسی ماتریکس",
+  "description": "سامانه هوشمند یادگیری و مرور لغات تخصصی انگلیسی با زبان طراحی متریال دیزاین ۳ و جعبه لایتنر",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafb",
+  "theme_color": "#006874",
+  "dir": "rtl",
+  "lang": "fa",
+  "categories": ["education", "books", "productivity"],
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -16,7 +16,8 @@ import { FlashcardMode } from '@/components/FlashcardMode';
 import { QuizMode } from '@/components/QuizMode';
 import { WordListMode } from '@/components/WordListMode';
 import { StatsView } from '@/components/StatsView';
-import { Loader2 } from 'lucide-react';
+import { AboutModal } from '@/components/AboutModal';
+import { Loader2, Globe, Heart } from 'lucide-react';
 
 export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -27,8 +28,10 @@ export default function Home() {
   const [progress, setProgress] = useState<UserProgress>(DEFAULT_PROGRESS);
   const [isDark, setIsDark] = useState(false);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
+  const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
-  // Initialize theme and progress
+  // Initialize theme, progress, and PWA install prompt
   useEffect(() => {
     // Theme setup
     const savedTheme = localStorage.getItem('farsimatrix_theme');
@@ -40,6 +43,13 @@ export default function Home() {
     } else {
       document.documentElement.classList.remove('dark');
     }
+
+    // PWA install event listener
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
     // Load progress
     const loaded = loadUserProgress();
@@ -58,6 +68,10 @@ export default function Home() {
       })
       .catch((err) => console.error('Error fetching categories:', err))
       .finally(() => setIsLoadingInitial(false));
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+    };
   }, []);
 
   // Sync theme changes
@@ -70,6 +84,18 @@ export default function Home() {
       localStorage.setItem('farsimatrix_theme', 'light');
     }
   }, [isDark]);
+
+  // PWA install trigger
+  const handleInstallPWA = () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult: any) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted PWA installation');
+      }
+      setDeferredPrompt(null);
+    });
+  };
 
   // Load words for a category (with in-memory cache)
   const loadWordsForCategory = useCallback(
@@ -151,6 +177,9 @@ export default function Home() {
         isDark={isDark}
         setIsDark={setIsDark}
         selectedCategoryTitle={selectedCategory?.title}
+        onOpenAbout={() => setIsAboutOpen(true)}
+        deferredPrompt={deferredPrompt}
+        onInstallPWA={handleInstallPWA}
       />
 
       {/* Main App Content Area */}
@@ -168,6 +197,7 @@ export default function Home() {
                 onSelectCategory={(cat, mode) => handleSelectCategory(cat, (mode as ActiveTab) || 'flashcard')}
                 selectedCategory={selectedCategory}
                 progress={progress}
+                onOpenAbout={() => setIsAboutOpen(true)}
               />
             )}
 
@@ -237,12 +267,67 @@ export default function Home() {
         )}
       </main>
 
+      {/* About Modal */}
+      <AboutModal
+        isOpen={isAboutOpen}
+        onClose={() => setIsAboutOpen(false)}
+        deferredPrompt={deferredPrompt}
+        onInstallPWA={handleInstallPWA}
+      />
+
       {/* Footer */}
       <footer
-        className="hidden md:block border-t py-6 mt-auto text-center text-xs opacity-60"
-        style={{ borderColor: 'var(--md-sys-color-outline-variant)' }}
+        className="border-t py-6 mt-auto text-xs"
+        style={{
+          borderColor: 'var(--md-sys-color-outline-variant)',
+          backgroundColor: 'var(--md-sys-color-surface-container-low)',
+        }}
       >
-        <p>فارسی ماتریکس (FarsiMatrix) — سامانه یادگیری هوشمند واژگان و اصطلاحات زبان انگلیسی با معماری لوکال و بدون هزینه سرور دیتابیس</p>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-right">
+          <div>
+            <p className="font-semibold text-zinc-700 dark:text-zinc-300">
+              فارسی ماتریکس (FarsiMatrix) — طراحی و توسعه توسط{' '}
+              <a
+                href="https://ehsanfazli.ir"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-bold underline hover:text-[var(--md-sys-color-primary)] transition-colors"
+              >
+                احسان فضل‌علی‌نژاد (Ehsan Fazli)
+              </a>
+            </p>
+            <p className="text-[11px] opacity-60 mt-0.5">
+              پلتفرم یادگیری لغات با جعبه لایتنر و معماری کاملاً محلی (Zero DB Cost)
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsAboutOpen(true)}
+              className="hover:underline font-medium cursor-pointer"
+            >
+              درباره سازنده و پروژه
+            </button>
+            <span>•</span>
+            <a
+              href="https://github.com/TssHack/FarsiMatrix"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline font-medium"
+            >
+              گیت‌هاب (GitHub)
+            </a>
+            <span>•</span>
+            <a
+              href="https://ehsanfazli.ir"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline font-bold text-teal-600 dark:text-teal-400"
+            >
+              ehsanfazli.ir
+            </a>
+          </div>
+        </div>
       </footer>
     </div>
   );

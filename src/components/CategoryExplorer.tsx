@@ -11,7 +11,16 @@ import {
   HelpCircle, 
   ListFilter,
   CheckCircle2,
-  TrendingUp
+  TrendingUp,
+  Zap,
+  Globe,
+  Award,
+  BookMarked,
+  Cpu,
+  GraduationCap,
+  Briefcase,
+  Compass,
+  Film
 } from 'lucide-react';
 
 interface CategoryExplorerProps {
@@ -19,6 +28,7 @@ interface CategoryExplorerProps {
   onSelectCategory: (cat: Category, mode?: 'flashcard' | 'quiz' | 'wordlist') => void;
   selectedCategory: Category | null;
   progress: UserProgress;
+  onOpenAbout: () => void;
 }
 
 export function CategoryExplorer({
@@ -26,18 +36,19 @@ export function CategoryExplorer({
   onSelectCategory,
   selectedCategory,
   progress,
+  onOpenAbout,
 }: CategoryExplorerProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCluster, setSelectedCluster] = useState<string>('all');
 
   const clusters = [
-    { id: 'all', label: 'همه سرفصل‌ها' },
-    { id: 'language', label: 'آموزش زبان و مکالمه' },
-    { id: 'tech', label: 'فناوری و مهندسی کامپیوتر' },
-    { id: 'business', label: 'کسب‌وکار و مدیریت' },
-    { id: 'science', label: 'علوم پایه و پزشکی' },
-    { id: 'engineering', label: 'فنی و مهندسی' },
-    { id: 'arts', label: 'سینما، هنر و رسانه' },
+    { id: 'all', label: 'همه سرفصل‌ها', icon: BookMarked },
+    { id: 'language', label: 'آموزش زبان و مکالمه', icon: GraduationCap },
+    { id: 'tech', label: 'فناوری و کامپیوتر', icon: Cpu },
+    { id: 'business', label: 'کسب‌وکار و مدیریت', icon: Briefcase },
+    { id: 'science', label: 'علوم پایه و پزشکی', icon: Compass },
+    { id: 'engineering', label: 'فنی و مهندسی', icon: Zap },
+    { id: 'arts', label: 'سینما و هنر', icon: Film },
   ];
 
   // Filter categories
@@ -71,39 +82,101 @@ export function CategoryExplorer({
 
   return (
     <div className="space-y-8 pb-16">
-      {/* Hero Banner (M3 Expressive) */}
+      {/* Hero Banner (Material Design 3 Expressive Showcase) */}
       <div
-        className="relative overflow-hidden rounded-3xl p-6 sm:p-10 border transition-all"
+        className="relative overflow-hidden rounded-3xl p-6 sm:p-10 border transition-all shadow-xs"
         style={{
-          backgroundColor: 'var(--md-sys-color-surface-container-high)',
+          background: 'linear-gradient(135deg, var(--md-sys-color-surface-container-high) 0%, var(--md-sys-color-surface-container) 100%)',
           borderColor: 'var(--md-sys-color-outline-variant)',
         }}
       >
         <div className="relative z-10 max-w-3xl">
-          <div
-            className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold mb-4 shadow-xs"
-            style={{
-              backgroundColor: 'var(--md-sys-color-primary-container)',
-              color: 'var(--md-sys-color-on-primary-container)',
-            }}
-          >
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>نسل جدید یادگیری هوشمند فارسی ماتریکس</span>
+          {/* Top Pill Badges */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <div
+              className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-black shadow-xs"
+              style={{
+                backgroundColor: 'var(--md-sys-color-primary-container)',
+                color: 'var(--md-sys-color-on-primary-container)',
+              }}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>فارسی ماتریکس (Material Design 3)</span>
+            </div>
+
+            <button
+              onClick={onOpenAbout}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer border transition-colors"
+              style={{
+                borderColor: 'var(--md-sys-color-outline-variant)',
+                color: 'var(--md-sys-color-on-surface-variant)',
+              }}
+            >
+              <span>توسعه‌دهنده: احسان فضل‌علی‌نژاد</span>
+              <span className="text-[10px] opacity-75 font-mono">(ehsanfazli.ir)</span>
+            </button>
           </div>
 
-          <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
-            سرفصل مد نظرت رو انتخاب کن و شروع کن به یادگیری!
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight mb-3 leading-snug">
+            سامانه مدرن یادگیری و حفظ زمان‌دار واژگان تخصصی
           </h1>
           <p
-            className="text-sm sm:text-base leading-relaxed mb-6"
+            className="text-xs sm:text-base leading-relaxed mb-6 font-medium"
             style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
           >
-            بیش از ۵۰ حوزه تخصصی و ۲۵۰,۰۰۰ واژه تفکیک‌شده با سیستم مرور زمان‌دار (جعبه لایتنر)، تلفظ استاندارد صوتی و کوئیزهای تعاملی چهارگزینه‌ای.
+            سرفصل مد نظرت رو انتخاب کن و با تکیه بر <strong>جعبه لایتنر ۵ مرحله‌ای</strong>، تلفظ هوشمند صوتی و کوئیزهای تعاملی، واژگان را در حافظه بلندمدت تثبیت کن.
           </p>
+
+          {/* Quick Stats Highlights */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+            <div
+              className="px-3.5 py-2 rounded-2xl border text-center"
+              style={{
+                backgroundColor: 'var(--md-sys-color-surface-container-low)',
+                borderColor: 'var(--md-sys-color-outline-variant)',
+              }}
+            >
+              <span className="text-base sm:text-lg font-black block">۵۱</span>
+              <span className="text-[10px] sm:text-xs opacity-75 font-semibold">سرفصل تخصصی</span>
+            </div>
+
+            <div
+              className="px-3.5 py-2 rounded-2xl border text-center"
+              style={{
+                backgroundColor: 'var(--md-sys-color-surface-container-low)',
+                borderColor: 'var(--md-sys-color-outline-variant)',
+              }}
+            >
+              <span className="text-base sm:text-lg font-black block">۲۵۰,۰۰۰+</span>
+              <span className="text-[10px] sm:text-xs opacity-75 font-semibold">لغت و اصطلاح</span>
+            </div>
+
+            <div
+              className="px-3.5 py-2 rounded-2xl border text-center"
+              style={{
+                backgroundColor: 'var(--md-sys-color-surface-container-low)',
+                borderColor: 'var(--md-sys-color-outline-variant)',
+              }}
+            >
+              <span className="text-base sm:text-lg font-black block text-teal-600 dark:text-teal-400">PWA</span>
+              <span className="text-[10px] sm:text-xs opacity-75 font-semibold">۱۰۰٪ آفلاین و محلی</span>
+            </div>
+
+            <div
+              className="px-3.5 py-2 rounded-2xl border text-center"
+              style={{
+                backgroundColor: 'var(--md-sys-color-surface-container-low)',
+                borderColor: 'var(--md-sys-color-outline-variant)',
+              }}
+            >
+              <span className="text-base sm:text-lg font-black block text-emerald-600 dark:text-emerald-400">۰ تومان</span>
+              <span className="text-[10px] sm:text-xs opacity-75 font-semibold">هزینه سرور دیتابیس</span>
+            </div>
+          </div>
 
           {/* Quick Search Bar (M3 Search Bar Spec) */}
           <div
-            className="relative flex items-center rounded-full px-4 py-2 sm:py-3 shadow-sm border max-w-xl transition-all focus-within:ring-2 focus-within:ring-[var(--md-sys-color-primary)]"
+            className="relative flex items-center rounded-full px-4 py-2.5 sm:py-3.5 shadow-xs border max-w-xl transition-all focus-within:ring-2 focus-within:ring-[var(--md-sys-color-primary)]"
             style={{
               backgroundColor: 'var(--md-sys-color-surface-container-lowest)',
               borderColor: 'var(--md-sys-color-outline-variant)',
@@ -118,12 +191,12 @@ export function CategoryExplorer({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="جستجو بین ۵۱ سرفصل (مثلاً: کامپیوتر، اصطلاحات، الگوریتم...)"
-              className="w-full bg-transparent outline-none text-sm font-medium placeholder:text-[var(--md-sys-color-outline)]"
+              className="w-full bg-transparent outline-none text-xs sm:text-sm font-medium placeholder:text-[var(--md-sys-color-outline)]"
             />
             {searchQuery && (
               <button
                 onClick={() => setSearchQuery('')}
-                className="text-xs px-2 py-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer font-bold"
+                className="text-xs px-2.5 py-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer font-bold"
                 style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
               >
                 پاک کردن
@@ -132,22 +205,23 @@ export function CategoryExplorer({
           </div>
         </div>
 
-        {/* Decorative background circle */}
+        {/* Decorative background shape */}
         <div
-          className="absolute -left-16 -bottom-16 w-64 h-64 rounded-full opacity-10 pointer-events-none blur-2xl"
+          className="absolute -left-20 -bottom-20 w-80 h-80 rounded-full opacity-15 pointer-events-none blur-3xl"
           style={{ backgroundColor: 'var(--md-sys-color-primary)' }}
         />
       </div>
 
-      {/* Cluster Filter Chips (M3 Filter Chips) */}
+      {/* Cluster Filter Chips (M3 Filter Chips with Icons) */}
       <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
         {clusters.map((cluster) => {
           const isSelected = selectedCluster === cluster.id;
+          const Icon = cluster.icon;
           return (
             <button
               key={cluster.id}
               onClick={() => setSelectedCluster(cluster.id)}
-              className="whitespace-nowrap px-4 py-2 rounded-full text-xs sm:text-sm font-medium transition-all duration-200 cursor-pointer flex-shrink-0"
+              className="whitespace-nowrap px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition-all duration-200 cursor-pointer flex-shrink-0 flex items-center gap-2"
               style={{
                 backgroundColor: isSelected
                   ? 'var(--md-sys-color-primary)'
@@ -160,7 +234,8 @@ export function CategoryExplorer({
                   : '1px solid var(--md-sys-color-outline-variant)',
               }}
             >
-              {cluster.label}
+              <Icon className="w-3.5 h-3.5" />
+              <span>{cluster.label}</span>
             </button>
           );
         })}
@@ -169,10 +244,10 @@ export function CategoryExplorer({
       {/* Categories Grid (M3 Cards) */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold">
-            سرفصل‌های موجود{' '}
+          <h2 className="text-lg font-bold flex items-center gap-2">
+            <span>سرفصل‌های آموزشی</span>
             <span
-              className="text-xs font-semibold px-2 py-0.5 rounded-full mr-2"
+              className="text-xs font-semibold px-2.5 py-0.5 rounded-full"
               style={{
                 backgroundColor: 'var(--md-sys-color-secondary-container)',
                 color: 'var(--md-sys-color-on-secondary-container)',
@@ -185,7 +260,7 @@ export function CategoryExplorer({
 
         {filteredCategories.length === 0 ? (
           <div
-            className="rounded-2xl p-12 text-center border"
+            className="rounded-3xl p-12 text-center border"
             style={{
               backgroundColor: 'var(--md-sys-color-surface-container)',
               borderColor: 'var(--md-sys-color-outline-variant)',
@@ -205,11 +280,11 @@ export function CategoryExplorer({
               return (
                 <div
                   key={cat.id}
-                  className={`group rounded-3xl p-5 border transition-all duration-200 flex flex-col justify-between hover:shadow-md hover:-translate-y-1 ${
+                  className={`group rounded-3xl p-5 sm:p-6 border transition-all duration-200 flex flex-col justify-between hover:shadow-md hover:-translate-y-1 ${
                     isCurrent ? 'ring-2 ring-[var(--md-sys-color-primary)]' : ''
                   }`}
                   style={{
-                    backgroundColor: 'var(--md-sys-color-surface-container-low)',
+                    backgroundColor: 'var(--md-sys-color-surface-container-lowest)',
                     borderColor: 'var(--md-sys-color-outline-variant)',
                   }}
                 >
@@ -217,7 +292,7 @@ export function CategoryExplorer({
                     {/* Header: Icon & Badges */}
                     <div className="flex items-start justify-between gap-3 mb-4">
                       <div
-                        className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105"
+                        className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-transform group-hover:scale-105 shadow-xs"
                         style={{
                           backgroundColor: 'var(--md-sys-color-primary-container)',
                           color: 'var(--md-sys-color-on-primary-container)',
@@ -237,7 +312,7 @@ export function CategoryExplorer({
                           {cat.level}
                         </span>
                         <span
-                          className="text-[11px] font-bold px-2.5 py-0.5 rounded-full"
+                          className="text-[11px] font-black px-2.5 py-0.5 rounded-full"
                           style={{
                             backgroundColor: 'var(--md-sys-color-secondary-container)',
                             color: 'var(--md-sys-color-on-secondary-container)',
@@ -249,17 +324,17 @@ export function CategoryExplorer({
                     </div>
 
                     {/* Titles & Description */}
-                    <h3 className="text-base font-bold mb-1 leading-snug group-hover:text-[var(--md-sys-color-primary)] transition-colors">
+                    <h3 className="text-base sm:text-lg font-black mb-1 leading-snug group-hover:text-[var(--md-sys-color-primary)] transition-colors">
                       {cat.title}
                     </h3>
                     <p
-                      className="text-xs font-mono font-medium tracking-wide mb-2 opacity-80"
+                      className="text-xs font-mono font-semibold tracking-wide mb-2 opacity-80"
                       style={{ color: 'var(--md-sys-color-primary)' }}
                     >
                       {cat.englishTitle}
                     </p>
                     <p
-                      className="text-xs line-clamp-2 leading-relaxed mb-4"
+                      className="text-xs line-clamp-2 leading-relaxed mb-4 font-normal"
                       style={{ color: 'var(--md-sys-color-on-surface-variant)' }}
                     >
                       {cat.description}
@@ -269,11 +344,11 @@ export function CategoryExplorer({
                   <div>
                     {/* Progress Bar (M3 Linear Progress) */}
                     <div className="mb-4">
-                      <div className="flex justify-between text-[11px] mb-1 font-medium">
+                      <div className="flex justify-between text-[11px] mb-1 font-semibold">
                         <span style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
                           میزان مرور و تسلط
                         </span>
-                        <span className="font-bold">{stats.percentage}%</span>
+                        <span className="font-extrabold">{stats.percentage}%</span>
                       </div>
                       <div
                         className="h-2 rounded-full overflow-hidden"
@@ -296,7 +371,7 @@ export function CategoryExplorer({
                     <div className="flex items-center gap-2 pt-2 border-t" style={{ borderColor: 'var(--md-sys-color-outline-variant)' }}>
                       <button
                         onClick={() => onSelectCategory(cat, 'flashcard')}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-full text-xs font-bold transition-all shadow-xs hover:shadow-sm cursor-pointer"
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-full text-xs font-extrabold transition-all shadow-xs hover:shadow-sm cursor-pointer"
                         style={{
                           backgroundColor: 'var(--md-sys-color-primary)',
                           color: 'var(--md-sys-color-on-primary)',

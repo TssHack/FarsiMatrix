@@ -1,48 +1,49 @@
 @import "tailwindcss";
 
 :root {
-  /* Material Design 3 Expressive - Teal/Cyan Theme (FarsiMatrix Brand) */
+  /* Material Design 3 Expressive - Refined Teal/Cyan Palette (Light Theme) */
   --md-sys-color-primary: #006874;
   --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #97f0ff;
+  --md-sys-color-primary-container: #c4f3fa;
   --md-sys-color-on-primary-container: #001f24;
 
   --md-sys-color-secondary: #4a6267;
   --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #cce8ed;
+  --md-sys-color-secondary-container: #d2eaee;
   --md-sys-color-on-secondary-container: #051f23;
 
-  --md-sys-color-tertiary: #525e7d;
+  --md-sys-color-tertiary: #4f5b7d;
   --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #dae2ff;
-  --md-sys-color-on-tertiary-container: #0e1b37;
+  --md-sys-color-tertiary-container: #dce3f9;
+  --md-sys-color-on-tertiary-container: #0a1736;
 
   --md-sys-color-error: #ba1a1a;
   --md-sys-color-on-error: #ffffff;
   --md-sys-color-error-container: #ffdad6;
   --md-sys-color-on-error-container: #410002;
 
-  --md-sys-color-success: #146c2e;
+  --md-sys-color-success: #196d32;
   --md-sys-color-on-success: #ffffff;
-  --md-sys-color-success-container: #a5f4ac;
+  --md-sys-color-success-container: #a9f5b2;
   --md-sys-color-on-success-container: #002107;
 
-  --md-sys-color-background: #f8fafb;
-  --md-sys-color-on-background: #191c1d;
+  /* Pastel Tonal Surfaces for Light Theme */
+  --md-sys-color-background: #f6f9f9;
+  --md-sys-color-on-background: #171d1e;
 
-  --md-sys-color-surface: #f8fafb;
-  --md-sys-color-on-surface: #191c1d;
-  --md-sys-color-surface-variant: #dbe4e6;
-  --md-sys-color-on-surface-variant: #3f484a;
+  --md-sys-color-surface: #f6f9f9;
+  --md-sys-color-on-surface: #171d1e;
+  --md-sys-color-surface-variant: #dce4e5;
+  --md-sys-color-on-surface-variant: #3e494a;
 
   --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #f2f5f5;
-  --md-sys-color-surface-container: #ebefef;
-  --md-sys-color-surface-container-high: #e5e9e9;
-  --md-sys-color-surface-container-highest: #dfe3e4;
+  --md-sys-color-surface-container-low: #f0f4f4;
+  --md-sys-color-surface-container: #eaefef;
+  --md-sys-color-surface-container-high: #e4e9e9;
+  --md-sys-color-surface-container-highest: #dee3e4;
 
   --md-sys-color-outline: #6f797a;
-  --md-sys-color-outline-variant: #bfc8ca;
+  --md-sys-color-outline-variant: #c0c9ca;
 
   /* M3 Shape Tokens */
   --md-sys-shape-corner-xs: 4px;
@@ -52,11 +53,11 @@
   --md-sys-shape-corner-xl: 28px;
   --md-sys-shape-corner-full: 9999px;
 
-  /* M3 Elevation Shadows */
+  /* M3 Elevation Shadows (Soft, layered depth) */
   --md-sys-elevation-0: 0px 0px 0px 0px transparent;
-  --md-sys-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.08), 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
-  --md-sys-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.08), 0px 1px 2px 0px rgba(0, 0, 0, 0.06);
-  --md-sys-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.1), 0px 1px 3px 0px rgba(0, 0, 0, 0.07);
+  --md-sys-elevation-1: 0px 2px 6px rgba(0, 79, 88, 0.05), 0px 1px 2px rgba(0, 0, 0, 0.04);
+  --md-sys-elevation-2: 0px 4px 12px rgba(0, 79, 88, 0.08), 0px 2px 4px rgba(0, 0, 0, 0.04);
+  --md-sys-elevation-3: 0px 8px 24px rgba(0, 79, 88, 0.12), 0px 3px 6px rgba(0, 0, 0, 0.06);
 }
 
 .dark {
@@ -100,11 +101,11 @@
   --md-sys-color-surface-container-highest: #303637;
 
   --md-sys-color-outline: #899294;
-  --md-sys-color-outline-variant: #3f484a;
+  --md-sys-color-outline-variant: #343c3e;
 
   --md-sys-elevation-1: 0px 1px 3px 1px rgba(0, 0, 0, 0.4), 0px 1px 2px 0px rgba(0, 0, 0, 0.2);
-  --md-sys-elevation-2: 0px 2px 6px 2px rgba(0, 0, 0, 0.45), 0px 1px 2px 0px rgba(0, 0, 0, 0.3);
-  --md-sys-elevation-3: 0px 4px 8px 3px rgba(0, 0, 0, 0.5), 0px 1px 3px 0px rgba(0, 0, 0, 0.35);
+  --md-sys-elevation-2: 0px 3px 8px 2px rgba(0, 0, 0, 0.45), 0px 1px 3px 0px rgba(0, 0, 0, 0.3);
+  --md-sys-elevation-3: 0px 6px 16px 3px rgba(0, 0, 0, 0.5), 0px 2px 4px 0px rgba(0, 0, 0, 0.35);
 }
 
 body {
@@ -138,8 +139,8 @@ body {
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
   background: var(--md-sys-color-surface-container);
@@ -150,4 +151,15 @@ body {
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--md-sys-color-outline);
+}
+
+/* Smooth Focus & Tap Highlights */
+button:focus-visible, a:focus-visible, input:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+/* Mobile Safe Areas */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
 }
