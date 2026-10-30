@@ -1,334 +1,329 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from 'react';
 import { Category, Word, ActiveTab, UserProgress, ReviewRating } from '@/types';
-import { 
-  loadUserProgress, 
-  saveUserProgress, 
-  recordWordReview, 
-  toggleWordBookmark, 
-  recordQuizCompletion, 
-  DEFAULT_PROGRESS 
+import {
+  loadUserProgress,
+  saveUserProgress,
+  recordWordReview,
+  toggleWordBookmark,
+  recordQuizCompletion,
+  DEFAULT_PROGRESS,
 } from '@/lib/storage';
-import { Navbar } from '@/components/Navbar';
+import { applyTheme, loadThemeSettings, ThemeSettings } from '@/lib/theme';
+import { NavigationBar, NavigationRail, TopAppBar } from '@/components/AppShell';
 import { CategoryExplorer } from '@/components/CategoryExplorer';
 import { FlashcardMode } from '@/components/FlashcardMode';
 import { QuizMode } from '@/components/QuizMode';
 import { WordListMode } from '@/components/WordListMode';
 import { StatsView } from '@/components/StatsView';
 import { AboutModal } from '@/components/AboutModal';
-import { Loader2, Globe, Heart } from 'lucide-react';
+import { ThemeDialog } from '@/components/ThemeDialog';
+import { LoadingIndicator } from '@/components/m3/Progress';
+import { Button } from '@/components/m3/Button';
+
+const TABS: ActiveTab[] = ['categories', 'flashcard', 'quiz', 'wordlist', 'stats'];
+const LAST_CATEGORY_KEY = 'farsimatrix_last_category';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
+
+function subscribeHash(callback: () => void) {
+  window.addEventListener('hashchange', callback);
+  return () => window.removeEventListener('hashchange', callback);
+}
+
+function parseHash(hash: string): { tab: ActiveTab; categoryId?: string } {
+  const [tab, categoryId] = hash.replace(/^#\/?/, '').split('/');
+  return TABS.includes(tab as ActiveTab) ? { tab: tab as ActiveTab, categoryId: categoryId || undefined } : { tab: 'categories' };
+}
+
+function readLastCategory(): string {
+  if (typeof window === 'undefined') return 'computer';
+  try {
+    return localStorage.getItem(LAST_CATEGORY_KEY) || 'computer';
+  } catch {
+    return 'computer';
+  }
+}
+
+function PageLoader({ label }: { label: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-5 py-28">
+      <LoadingIndicator size={56} label={label} />
+      <p className="text-body-m text-on-surface-variant">{label}</p>
+    </div>
+  );
+}
 
 export default function Home() {
+  const hash = useSyncExternalStore(subscribeHash, () => window.location.hash, () => '');
+  const route = useMemo(() => parseHash(hash), [hash]);
+  const activeTab = route.tab;
+
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [activeTab, setActiveTab] = useState<ActiveTab>('categories');
+  const [lastCategoryId, setLastCategoryId] = useState<string>(readLastCategory);
   const [wordsCache, setWordsCache] = useState<Record<string, Word[]>>({});
-  const [isLoadingWords, setIsLoadingWords] = useState(false);
+  const [failedCategories, setFailedCategories] = useState<Record<string, boolean>>({});
   const [progress, setProgress] = useState<UserProgress>(DEFAULT_PROGRESS);
-  const [isDark, setIsDark] = useState(false);
   const [isLoadingInitial, setIsLoadingInitial] = useState(true);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isThemeOpen, setIsThemeOpen] = useState(false);
+  const [themeSettings, setThemeSettings] = useState<ThemeSettings>(loadThemeSettings);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
 
-  // Initialize theme, progress, and PWA install prompt
+  const selectedCategoryId = route.categoryId ?? lastCategoryId;
+  const selectedCategory = useMemo(
+    () => categories.find((c) => c.id === selectedCategoryId) ?? categories.find((c) => c.id === 'computer') ?? categories[0] ?? null,
+    [categories, selectedCategoryId]
+  );
+
+  // Initial data: categories manifest + local progress
   useEffect(() => {
-    // Theme setup
-    const savedTheme = localStorage.getItem('farsimatrix_theme');
-    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const shouldBeDark = savedTheme ? savedTheme === 'dark' : prefersDark;
-    setIsDark(shouldBeDark);
-    if (shouldBeDark) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-
-    // PWA install event listener
-    const handleBeforeInstall = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
-
-    // Load progress
-    const loaded = loadUserProgress();
-    setProgress(loaded);
-
-    // Fetch categories manifest
     fetch('/data/categories.json')
       .then((res) => res.json())
-      .then((data: Category[]) => {
-        setCategories(data);
-        if (data.length > 0) {
-          // Pre-select 'computer' or first category
-          const defaultCat = data.find((c) => c.id === 'computer') || data[0];
-          setSelectedCategory(defaultCat);
-        }
-      })
+      .then((data: Category[]) => setCategories(data))
       .catch((err) => console.error('Error fetching categories:', err))
-      .finally(() => setIsLoadingInitial(false));
+      .finally(() => {
+        setProgress(loadUserProgress());
+        setIsLoadingInitial(false);
+      });
 
+    const handleBeforeInstall = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e as BeforeInstallPromptEvent);
+    };
+    const handleInstalled = () => setInstallPrompt(null);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
+    window.addEventListener('appinstalled', handleInstalled);
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
+      window.removeEventListener('appinstalled', handleInstalled);
     };
   }, []);
 
-  // Sync theme changes
+  // Keep "system" theme mode in sync with the OS setting
   useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('farsimatrix_theme', 'dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('farsimatrix_theme', 'light');
-    }
-  }, [isDark]);
+    if (themeSettings.mode !== 'system') return;
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => applyTheme(themeSettings);
+    media.addEventListener('change', onChange);
+    return () => media.removeEventListener('change', onChange);
+  }, [themeSettings]);
 
-  // PWA install trigger
-  const handleInstallPWA = () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult: any) => {
-      if (choiceResult.outcome === 'accepted') {
-        console.log('User accepted PWA installation');
-      }
-      setDeferredPrompt(null);
-    });
-  };
-
-  // Load words for a category (with in-memory cache)
-  const loadWordsForCategory = useCallback(
-    async (categoryId: string): Promise<Word[]> => {
-      if (wordsCache[categoryId]) {
-        return wordsCache[categoryId];
-      }
-
-      setIsLoadingWords(true);
-      try {
-        const res = await fetch(`/data/groups/${categoryId}.json`);
-        if (!res.ok) throw new Error('Failed to load category words');
-        const data: Word[] = await res.json();
-        setWordsCache((prev) => ({ ...prev, [categoryId]: data }));
-        return data;
-      } catch (err) {
+  // Lazy-load the selected category's words
+  const needsWords = !!selectedCategory && activeTab !== 'categories' && activeTab !== 'stats';
+  const selectedId = selectedCategory?.id;
+  const hasWords = selectedId ? !!wordsCache[selectedId] : false;
+  const hasFailed = selectedId ? !!failedCategories[selectedId] : false;
+  useEffect(() => {
+    if (!needsWords || !selectedId || hasWords || hasFailed) return;
+    let cancelled = false;
+    fetch(`/data/groups/${selectedId}.json`)
+      .then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then((data: Word[]) => {
+        if (!cancelled) setWordsCache((prev) => ({ ...prev, [selectedId]: data }));
+      })
+      .catch((err) => {
         console.error('Error loading category words:', err);
-        return [];
-      } finally {
-        setIsLoadingWords(false);
+        if (!cancelled) setFailedCategories((prev) => ({ ...prev, [selectedId]: true }));
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsWords, selectedId, hasWords, hasFailed]);
+
+  const navigate = useCallback(
+    (tab: ActiveTab, categoryId?: string) => {
+      const id = categoryId ?? selectedCategory?.id;
+      if (id) {
+        setLastCategoryId(id);
+        try {
+          localStorage.setItem(LAST_CATEGORY_KEY, id);
+        } catch {
+          // storage unavailable
+        }
       }
+      const withCategory = tab === 'flashcard' || tab === 'quiz' || tab === 'wordlist';
+      const nextHash = `#/${tab}${withCategory && id ? `/${id}` : ''}`;
+      if (window.location.hash !== nextHash) {
+        window.location.hash = nextHash;
+      }
+      window.scrollTo({ top: 0 });
     },
-    [wordsCache]
+    [selectedCategory]
   );
 
-  // When selectedCategory changes, ensure words are loaded
-  useEffect(() => {
-    if (selectedCategory && !wordsCache[selectedCategory.id]) {
-      loadWordsForCategory(selectedCategory.id);
-    }
-  }, [selectedCategory, loadWordsForCategory, wordsCache]);
-
-  // Select category handler
-  const handleSelectCategory = async (cat: Category, mode: ActiveTab = 'flashcard') => {
-    setSelectedCategory(cat);
-    await loadWordsForCategory(cat.id);
-    setActiveTab(mode);
+  const handleThemeChange = (next: ThemeSettings) => {
+    setThemeSettings(next);
+    applyTheme(next);
   };
 
-  // Review word handler
-  const handleReviewWord = (wordId: string, rating: ReviewRating) => {
-    const updated = recordWordReview(wordId, rating);
-    setProgress(updated);
+  const handleInstallPWA = async () => {
+    if (!installPrompt) return;
+    await installPrompt.prompt();
+    await installPrompt.userChoice;
+    setInstallPrompt(null);
   };
 
-  // Bookmark handler
-  const handleToggleBookmark = (wordId: string) => {
-    const { progress: updated } = toggleWordBookmark(wordId);
-    setProgress(updated);
-  };
-
-  // Quiz completion handler
-  const handleQuizCompletion = (total: number, correct: number) => {
-    const updated = recordQuizCompletion(total, correct);
-    setProgress(updated);
-  };
-
-  // Reset progress handler
+  const handleReviewWord = (wordId: string, rating: ReviewRating) => setProgress(recordWordReview(wordId, rating));
+  const handleToggleBookmark = (wordId: string) => setProgress(toggleWordBookmark(wordId).progress);
+  const handleQuizCompletion = (total: number, correct: number) => setProgress(recordQuizCompletion(total, correct));
   const handleResetProgress = () => {
     saveUserProgress(DEFAULT_PROGRESS);
     setProgress(DEFAULT_PROGRESS);
   };
-
-  // Import progress handler
   const handleImportProgress = (imported: UserProgress) => {
     saveUserProgress(imported);
     setProgress(imported);
   };
 
-  const currentWords = selectedCategory ? wordsCache[selectedCategory.id] || [] : [];
+  const currentWords = selectedCategory ? wordsCache[selectedCategory.id] : undefined;
+
+  const renderWordScreen = (render: (category: Category, words: Word[]) => React.ReactNode, loadingLabel: string) => {
+    if (!selectedCategory) return null;
+    if (hasFailed) {
+      return (
+        <div className="flex flex-col items-center gap-4 py-24 text-center">
+          <p className="text-title-m">بارگذاری واژگان این سرفصل ممکن نشد.</p>
+          <Button
+            variant="tonal"
+            icon="refresh"
+            onClick={() => setFailedCategories((prev) => ({ ...prev, [selectedCategory.id]: false }))}
+          >
+            تلاش دوباره
+          </Button>
+        </div>
+      );
+    }
+    if (!currentWords) return <PageLoader label={loadingLabel} />;
+    return render(selectedCategory, currentWords);
+  };
 
   return (
-    <div className="min-h-screen flex flex-col transition-colors duration-200">
-      {/* Top Navbar & Header */}
-      <Navbar
+    <div className="min-h-dvh">
+      <NavigationRail
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        progress={progress}
-        isDark={isDark}
-        setIsDark={setIsDark}
-        selectedCategoryTitle={selectedCategory?.title}
+        onNavigate={(tab) => navigate(tab)}
+        onOpenTheme={() => setIsThemeOpen(true)}
         onOpenAbout={() => setIsAboutOpen(true)}
-        deferredPrompt={deferredPrompt}
-        onInstallPWA={handleInstallPWA}
+        onContinue={() => navigate('flashcard')}
       />
 
-      {/* Main App Content Area */}
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 w-full">
-        {isLoadingInitial ? (
-          <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <Loader2 className="w-10 h-10 animate-spin text-[var(--md-sys-color-primary)]" />
-            <p className="text-sm font-bold opacity-75">در حال بارگذاری پایگاه واژگان فارسی ماتریکس...</p>
-          </div>
-        ) : (
-          <>
-            {activeTab === 'categories' && (
-              <CategoryExplorer
-                categories={categories}
-                onSelectCategory={(cat, mode) => handleSelectCategory(cat, (mode as ActiveTab) || 'flashcard')}
-                selectedCategory={selectedCategory}
-                progress={progress}
-                onOpenAbout={() => setIsAboutOpen(true)}
-              />
-            )}
+      <div className="flex min-h-dvh flex-col sm:ps-24">
+        <TopAppBar
+          activeTab={activeTab}
+          subtitle={selectedCategory?.title}
+          streak={progress.dailyStreak.count}
+          canInstall={!!installPrompt}
+          onInstall={handleInstallPWA}
+          onOpenTheme={() => setIsThemeOpen(true)}
+          onOpenAbout={() => setIsAboutOpen(true)}
+          onOpenStats={() => navigate('stats')}
+          onHome={() => navigate('categories')}
+        />
 
-            {activeTab === 'flashcard' && selectedCategory && (
-              isLoadingWords && currentWords.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 space-y-4">
-                  <Loader2 className="w-10 h-10 animate-spin text-[var(--md-sys-color-primary)]" />
-                  <p className="text-sm font-bold opacity-75">در حال آماده‌سازی کارت‌های {selectedCategory.title}...</p>
-                </div>
-              ) : (
-                <FlashcardMode
-                  category={selectedCategory}
-                  words={currentWords}
+        <main className="mx-auto w-full max-w-[1100px] flex-1 px-4 pb-8 pt-2 sm:px-6">
+          {isLoadingInitial ? (
+            <PageLoader label="در حال آماده‌سازی واژگان…" />
+          ) : (
+            <div key={`${activeTab}:${selectedCategory?.id ?? ''}`} className="animate-fade-through">
+              {activeTab === 'categories' && (
+                <CategoryExplorer
+                  categories={categories}
+                  selectedCategory={selectedCategory}
                   progress={progress}
-                  onReviewWord={handleReviewWord}
-                  onToggleBookmark={handleToggleBookmark}
-                  onChangeCategory={() => setActiveTab('categories')}
+                  onSelectCategory={(cat, mode) => navigate(mode, cat.id)}
                 />
-              )
-            )}
+              )}
 
-            {activeTab === 'quiz' && selectedCategory && (
-              isLoadingWords && currentWords.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 space-y-4">
-                  <Loader2 className="w-10 h-10 animate-spin text-[var(--md-sys-color-primary)]" />
-                  <p className="text-sm font-bold opacity-75">در حال ساخت کوئیز تعاملی...</p>
-                </div>
-              ) : (
-                <QuizMode
-                  category={selectedCategory}
-                  words={currentWords}
+              {activeTab === 'flashcard' &&
+                renderWordScreen(
+                  (category, words) => (
+                    <FlashcardMode
+                      category={category}
+                      words={words}
+                      progress={progress}
+                      onReviewWord={handleReviewWord}
+                      onToggleBookmark={handleToggleBookmark}
+                      onChangeCategory={() => navigate('categories')}
+                    />
+                  ),
+                  'در حال آماده‌سازی کارت‌ها…'
+                )}
+
+              {activeTab === 'quiz' &&
+                renderWordScreen(
+                  (category, words) => (
+                    <QuizMode
+                      category={category}
+                      words={words}
+                      onRecordQuizCompletion={handleQuizCompletion}
+                      onStartFlashcard={() => navigate('flashcard')}
+                      onChangeCategory={() => navigate('categories')}
+                    />
+                  ),
+                  'در حال ساخت آزمون…'
+                )}
+
+              {activeTab === 'wordlist' &&
+                renderWordScreen(
+                  (category, words) => (
+                    <WordListMode
+                      category={category}
+                      words={words}
+                      progress={progress}
+                      onToggleBookmark={handleToggleBookmark}
+                      onChangeCategory={() => navigate('categories')}
+                    />
+                  ),
+                  'در حال بارگذاری واژه‌نامه…'
+                )}
+
+              {activeTab === 'stats' && (
+                <StatsView
                   progress={progress}
-                  onRecordQuizCompletion={handleQuizCompletion}
-                  onStartFlashcard={() => setActiveTab('flashcard')}
-                  onChangeCategory={() => setActiveTab('categories')}
+                  categories={categories}
+                  onResetProgress={handleResetProgress}
+                  onImportProgress={handleImportProgress}
+                  onStartStudy={() => navigate('flashcard')}
                 />
-              )
-            )}
+              )}
+            </div>
+          )}
+        </main>
 
-            {activeTab === 'wordlist' && selectedCategory && (
-              isLoadingWords && currentWords.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 space-y-4">
-                  <Loader2 className="w-10 h-10 animate-spin text-[var(--md-sys-color-primary)]" />
-                  <p className="text-sm font-bold opacity-75">در حال لود واژگان {selectedCategory.title}...</p>
-                </div>
-              ) : (
-                <WordListMode
-                  category={selectedCategory}
-                  words={currentWords}
-                  progress={progress}
-                  onToggleBookmark={handleToggleBookmark}
-                  onChangeCategory={() => setActiveTab('categories')}
-                />
-              )
-            )}
+        <footer className="px-4 pb-[calc(104px+env(safe-area-inset-bottom,0px))] pt-4 text-center text-body-s text-on-surface-variant sm:pb-6">
+          فارسی ماتریکس — طراحی و توسعه توسط{' '}
+          <a href="https://ehsanfazli.ir" target="_blank" rel="noopener noreferrer" className="text-primary underline-offset-4 hover:underline">
+            احسان فضلی
+          </a>
+          {' · '}
+          <a
+            href="https://github.com/TssHack/FarsiMatrix"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline-offset-4 hover:underline"
+          >
+            گیت‌هاب
+          </a>
+        </footer>
+      </div>
 
-            {activeTab === 'stats' && (
-              <StatsView
-                progress={progress}
-                categories={categories}
-                onResetProgress={handleResetProgress}
-                onImportProgress={handleImportProgress}
-                onStartStudy={() => setActiveTab('categories')}
-              />
-            )}
-          </>
-        )}
-      </main>
+      <NavigationBar activeTab={activeTab} onNavigate={(tab) => navigate(tab)} />
 
-      {/* About Modal */}
       <AboutModal
         isOpen={isAboutOpen}
         onClose={() => setIsAboutOpen(false)}
-        deferredPrompt={deferredPrompt}
+        canInstall={!!installPrompt}
         onInstallPWA={handleInstallPWA}
       />
-
-      {/* Footer */}
-      <footer
-        className="border-t py-6 mt-auto text-xs"
-        style={{
-          borderColor: 'var(--md-sys-color-outline-variant)',
-          backgroundColor: 'var(--md-sys-color-surface-container-low)',
-        }}
-      >
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-right">
-          <div>
-            <p className="font-semibold text-zinc-700 dark:text-zinc-300">
-              فارسی ماتریکس (FarsiMatrix) — طراحی و توسعه توسط{' '}
-              <a
-                href="https://ehsanfazli.ir"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-bold underline hover:text-[var(--md-sys-color-primary)] transition-colors"
-              >
-                احسان فضلی (Ehsan Fazli)
-              </a>
-            </p>
-            <p className="text-[11px] opacity-60 mt-0.5">
-              پلتفرم یادگیری لغات با جعبه لایتنر و معماری کاملاً محلی (Zero DB Cost)
-            </p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsAboutOpen(true)}
-              className="hover:underline font-medium cursor-pointer"
-            >
-              درباره سازنده و پروژه
-            </button>
-            <span>•</span>
-            <a
-              href="https://github.com/TssHack/FarsiMatrix"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline font-medium"
-            >
-              گیت‌هاب (GitHub)
-            </a>
-            <span>•</span>
-            <a
-              href="https://ehsanfazli.ir"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:underline font-bold text-teal-600 dark:text-teal-400"
-            >
-              ehsanfazli.ir
-            </a>
-          </div>
-        </div>
-      </footer>
+      <ThemeDialog open={isThemeOpen} onClose={() => setIsThemeOpen(false)} settings={themeSettings} onChange={handleThemeChange} />
     </div>
   );
 }

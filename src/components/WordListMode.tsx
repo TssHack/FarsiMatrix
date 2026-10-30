@@ -1,19 +1,13 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Word, Category, UserProgress } from '@/types';
 import { playPronunciation } from '@/lib/speech';
-import { 
-  Search, 
-  Volume2, 
-  Star, 
-  BookOpen, 
-  CheckCircle2, 
-  Clock, 
-  ChevronLeft, 
-  ChevronRight,
-  Filter
-} from 'lucide-react';
+import { fa } from '@/lib/format';
+import { Icon } from './m3/Icon';
+import { IconButton } from './m3/Button';
+import { FilterChip, Tag } from './m3/Chip';
+import { Shape } from './m3/Shape';
 
 interface WordListModeProps {
   category: Category;
@@ -23,231 +17,177 @@ interface WordListModeProps {
   onChangeCategory: () => void;
 }
 
-export function WordListMode({
-  category,
-  words,
-  progress,
-  onToggleBookmark,
-  onChangeCategory,
-}: WordListModeProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'bookmarked' | 'mastered' | 'learning'>('all');
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 30;
+type StatusFilter = 'all' | 'bookmarked' | 'learning' | 'mastered' | 'new';
+const PAGE_SIZE = 30;
 
-  // Filtered words
+export function WordListMode({ category, words, progress, onToggleBookmark, onChangeCategory }: WordListModeProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const bookmarkedSet = useMemo(() => new Set(progress.bookmarkedWords), [progress.bookmarkedWords]);
+
+  const counts = useMemo(() => {
+    const c = { all: words.length, bookmarked: 0, learning: 0, mastered: 0, new: 0 };
+    for (const w of words) {
+      const p = progress.learnedWords[w.id];
+      if (bookmarkedSet.has(w.id)) c.bookmarked++;
+      if (!p) c.new++;
+      else if (p.box >= 4) c.mastered++;
+      else c.learning++;
+    }
+    return c;
+  }, [words, progress.learnedWords, bookmarkedSet]);
+
   const filteredWords = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return words.filter((w) => {
       const p = progress.learnedWords[w.id];
-      const isBookmarked = progress.bookmarkedWords.includes(w.id);
-
       let matchesStatus = true;
-      if (statusFilter === 'bookmarked') matchesStatus = isBookmarked;
+      if (statusFilter === 'bookmarked') matchesStatus = bookmarkedSet.has(w.id);
       else if (statusFilter === 'mastered') matchesStatus = !!p && p.box >= 4;
       else if (statusFilter === 'learning') matchesStatus = !!p && p.box < 4;
-
-      const q = searchQuery.trim().toLowerCase();
-      const matchesSearch =
-        !q ||
-        w.word.toLowerCase().includes(q) ||
-        w.meanings.some((m) => m.toLowerCase().includes(q));
-
+      else if (statusFilter === 'new') matchesStatus = !p;
+      const matchesSearch = !q || w.word.toLowerCase().includes(q) || w.meanings.some((m) => m.toLowerCase().includes(q));
       return matchesStatus && matchesSearch;
     });
-  }, [words, searchQuery, statusFilter, progress.learnedWords, progress.bookmarkedWords]);
+  }, [words, searchQuery, statusFilter, progress.learnedWords, bookmarkedSet]);
 
-  // Pagination
-  const totalPages = Math.ceil(filteredWords.length / pageSize) || 1;
-  const paginatedWords = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return filteredWords.slice(start, start + pageSize);
-  }, [filteredWords, currentPage]);
+  const totalPages = Math.max(1, Math.ceil(filteredWords.length / PAGE_SIZE));
+  const page = Math.min(currentPage, totalPages);
+  const pageWords = filteredWords.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const goToPage = (p: number) => {
+    setCurrentPage(p);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const filters: { id: StatusFilter; label: string; icon?: string }[] = [
+    { id: 'all', label: `همه · ${fa(counts.all)}` },
+    { id: 'bookmarked', label: `نشان‌شده · ${fa(counts.bookmarked)}`, icon: 'star' },
+    { id: 'new', label: `جدید · ${fa(counts.new)}`, icon: 'auto_awesome' },
+    { id: 'learning', label: `در حال یادگیری · ${fa(counts.learning)}`, icon: 'school' },
+    { id: 'mastered', label: `مسلط · ${fa(counts.mastered)}`, icon: 'workspace_premium' },
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
-      {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span
-              onClick={onChangeCategory}
-              className="text-xs font-semibold cursor-pointer hover:underline"
-              style={{ color: 'var(--md-sys-color-primary)' }}
-            >
-              سرفصل‌ها
-            </span>
-            <span className="text-xs opacity-50">/</span>
-            <span className="text-xs font-bold">{category.title}</span>
-          </div>
-          <h2 className="text-2xl font-black">فهرست و واژه‌نامه تخصصی</h2>
-          <p className="text-xs" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
-            مجموعاً {words.length.toLocaleString('fa-IR')} لغت و اصطلاح تخصصی با تلفظ دقیق
-          </p>
-        </div>
-
-        {/* Search Input (M3 Outlined Field) */}
-        <div
-          className="relative flex items-center rounded-full px-4 py-2 border shadow-xs max-w-xs w-full"
-          style={{
-            backgroundColor: 'var(--md-sys-color-surface-container-lowest)',
-            borderColor: 'var(--md-sys-color-outline-variant)',
-          }}
-        >
-          <Search className="w-4 h-4 ml-2 opacity-60 flex-shrink-0" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => {
-              setSearchQuery(e.target.value);
-              setCurrentPage(1);
-            }}
-            placeholder="جستجوی لغت یا معنی..."
-            className="w-full bg-transparent outline-none text-xs font-medium"
-          />
+    <div className="mx-auto max-w-4xl space-y-5">
+      <div className="flex items-center gap-2">
+        <IconButton icon="arrow_forward" label="بازگشت به سرفصل‌ها" onClick={onChangeCategory} />
+        <div className="min-w-0">
+          <h2 className="truncate text-title-l text-on-surface">{category.title}</h2>
+          <p className="text-body-s text-on-surface-variant">واژه‌نامه · {fa(words.length)} واژه</p>
         </div>
       </div>
 
-      {/* Filter Chips */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1">
-        {[
-          { id: 'all', label: `همه لغات (${words.length})` },
-          { id: 'bookmarked', label: `ستاره‌دارها (${progress.bookmarkedWords.filter((id) => id.startsWith(`${category.id}_`)).length})` },
-          { id: 'learning', label: 'در حال یادگیری' },
-          { id: 'mastered', label: 'مسلط شده' },
-        ].map((f) => (
-          <button
-            key={f.id}
+      <label className="flex h-14 items-center gap-3 rounded-full bg-surface-container-high ps-4 pe-1 transition-shadow focus-within:shadow-elevation-2">
+        <Icon name="search" className="text-on-surface-variant" />
+        <input
+          type="search"
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setCurrentPage(1);
+          }}
+          placeholder="جستجوی واژه یا معنی…"
+          aria-label="جستجوی واژه یا معنی"
+          className="h-full min-w-0 flex-1 bg-transparent text-body-l outline-none placeholder:text-on-surface-variant [&::-webkit-search-cancel-button]:hidden"
+        />
+        {searchQuery && (
+          <IconButton
+            icon="close"
+            label="پاک کردن جستجو"
             onClick={() => {
-              setStatusFilter(f.id as any);
+              setSearchQuery('');
               setCurrentPage(1);
             }}
-            className="whitespace-nowrap px-4 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer"
-            style={{
-              backgroundColor:
-                statusFilter === f.id
-                  ? 'var(--md-sys-color-primary)'
-                  : 'var(--md-sys-color-surface-container)',
-              color:
-                statusFilter === f.id
-                  ? 'var(--md-sys-color-on-primary)'
-                  : 'var(--md-sys-color-on-surface-variant)',
-              borderColor: 'var(--md-sys-color-outline-variant)',
+          />
+        )}
+      </label>
+
+      <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 no-scrollbar sm:mx-0 sm:flex-wrap sm:px-0">
+        {filters.map((f) => (
+          <FilterChip
+            key={f.id}
+            label={f.label}
+            icon={f.icon}
+            selected={statusFilter === f.id}
+            onClick={() => {
+              setStatusFilter(f.id);
+              setCurrentPage(1);
             }}
-          >
-            {f.label}
-          </button>
+          />
         ))}
       </div>
 
-      {/* Words List */}
-      <div className="space-y-3">
-        {paginatedWords.length === 0 ? (
-          <div
-            className="rounded-3xl p-12 text-center border"
-            style={{
-              backgroundColor: 'var(--md-sys-color-surface-container)',
-              borderColor: 'var(--md-sys-color-outline-variant)',
-            }}
-          >
-            <p className="text-sm font-bold">هیچ لغتی با این مشخصات یافت نشد.</p>
-          </div>
-        ) : (
-          paginatedWords.map((item) => {
+      {pageWords.length === 0 ? (
+        <div className="flex flex-col items-center gap-4 rounded-shape-xl bg-surface-container-low px-6 py-16 text-center">
+          <Shape kind="cookie6" size={88} className="text-secondary-container">
+            <Icon name="search" size={36} className="text-on-secondary-container" />
+          </Shape>
+          <p className="text-title-m text-on-surface">واژه‌ای با این مشخصات پیدا نشد</p>
+        </div>
+      ) : (
+        <ul className="overflow-hidden rounded-shape-xl bg-surface-container-low">
+          {pageWords.map((item, idx) => {
             const p = progress.learnedWords[item.id];
-            const isBookmarked = progress.bookmarkedWords.includes(item.id);
-
+            const isBookmarked = bookmarkedSet.has(item.id);
             return (
-              <div
+              <li
                 key={item.id}
-                className="p-4 sm:p-5 rounded-2xl border transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:shadow-xs"
-                style={{
-                  backgroundColor: 'var(--md-sys-color-surface-container-low)',
-                  borderColor: 'var(--md-sys-color-outline-variant)',
-                }}
+                className={`flex items-center gap-4 px-4 py-3 transition-colors hover:bg-surface-container sm:px-5 ${
+                  idx > 0 ? 'border-t border-outline-variant/60' : ''
+                }`}
               >
-                {/* Left: Word & Meanings */}
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-black tracking-wide dir-ltr text-ltr">
+                <span
+                  className={`latin grid h-10 w-10 shrink-0 place-items-center rounded-full text-title-m font-bold uppercase ${
+                    p && p.box >= 4 ? 'bg-success-container text-on-success-container' : 'bg-primary-container text-on-primary-container'
+                  }`}
+                  aria-hidden="true"
+                >
+                  {item.word.replace(/^[^a-zA-Z0-9]+/, '').charAt(0) || '·'}
+                </span>
+
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span dir="ltr" className="latin text-body-l font-semibold text-on-surface">
                       {item.word}
                     </span>
-                    <button
-                      onClick={() => playPronunciation(item.word)}
-                      className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer text-teal-600 dark:text-teal-400"
-                      title="پخش تلفظ صوتی"
-                    >
-                      <Volume2 className="w-4 h-4" />
-                    </button>
-                    {p && (
-                      <span
-                        className="text-[10px] font-bold px-2 py-0.5 rounded-full"
-                        style={{
-                          backgroundColor:
-                            p.box >= 4
-                              ? 'var(--md-sys-color-success-container)'
-                              : 'var(--md-sys-color-secondary-container)',
-                          color:
-                            p.box >= 4
-                              ? 'var(--md-sys-color-on-success-container)'
-                              : 'var(--md-sys-color-on-secondary-container)',
-                        }}
-                      >
-                        جعبه {p.box}
-                      </span>
-                    )}
+                    {p && <Tag tone={p.box >= 4 ? 'success' : 'secondary'}>جعبه {fa(p.box)}</Tag>}
                   </div>
-                  <p className="text-sm font-bold text-zinc-700 dark:text-zinc-200 leading-relaxed">
-                    {item.meanings.join('، ')}
-                  </p>
+                  <p className="text-body-m text-on-surface-variant">{item.meanings.join('، ')}</p>
                 </div>
 
-                {/* Right: Actions */}
-                <div className="flex items-center gap-2 self-end sm:self-center">
-                  <button
+                <div className="flex shrink-0 items-center">
+                  <IconButton icon="volume_up" label={`تلفظ ${item.word}`} onClick={() => playPronunciation(item.word)} />
+                  <IconButton
+                    icon="star"
+                    label={isBookmarked ? 'حذف نشان' : 'نشان کردن'}
+                    selected={isBookmarked}
+                    className={isBookmarked ? '!text-flame' : ''}
                     onClick={() => onToggleBookmark(item.id)}
-                    className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-transform active:scale-90"
-                    title={isBookmarked ? 'حذف نشان' : 'نشان کردن'}
-                  >
-                    <Star
-                      className={`w-5 h-5 ${
-                        isBookmarked ? 'fill-amber-400 text-amber-400' : 'text-zinc-400'
-                      }`}
-                    />
-                  </button>
+                  />
                 </div>
-              </div>
+              </li>
             );
-          })
-        )}
-      </div>
+          })}
+        </ul>
+      )}
 
-      {/* Pagination Controls */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: 'var(--md-sys-color-outline-variant)' }}>
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
-            disabled={currentPage === 1}
-            className="flex items-center gap-1 px-4 py-2 rounded-full text-xs font-bold border disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-            style={{ borderColor: 'var(--md-sys-color-outline-variant)' }}
-          >
-            <ChevronRight className="w-4 h-4" />
-            <span>صفحه قبل</span>
-          </button>
-
-          <span className="text-xs font-semibold">
-            صفحه {currentPage.toLocaleString('fa-IR')} از {totalPages.toLocaleString('fa-IR')}
+        <nav aria-label="صفحه‌بندی" className="flex items-center justify-center gap-3">
+          <IconButton icon="chevron_right" variant="outlined" label="صفحه قبل" disabled={page === 1} onClick={() => goToPage(page - 1)} />
+          <span className="min-w-28 text-center text-label-l text-on-surface">
+            صفحه {fa(page)} از {fa(totalPages)}
           </span>
-
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(p + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="flex items-center gap-1 px-4 py-2 rounded-full text-xs font-bold border disabled:opacity-40 cursor-pointer disabled:cursor-not-allowed"
-            style={{ borderColor: 'var(--md-sys-color-outline-variant)' }}
-          >
-            <span>صفحه بعد</span>
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-        </div>
+          <IconButton
+            icon="chevron_left"
+            variant="outlined"
+            label="صفحه بعد"
+            disabled={page === totalPages}
+            onClick={() => goToPage(page + 1)}
+          />
+        </nav>
       )}
     </div>
   );

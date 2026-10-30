@@ -1,19 +1,15 @@
 'use client';
 
-import React, { useRef } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { UserProgress, Category } from '@/types';
-import { 
-  Flame, 
-  Trophy, 
-  BookOpen, 
-  CheckCircle, 
-  Layers, 
-  Download, 
-  Upload, 
-  Trash2, 
-  Award,
-  Sparkles
-} from 'lucide-react';
+import { sanitizeImportedProgress } from '@/lib/storage';
+import { fa, faPercent } from '@/lib/format';
+import { Icon } from './m3/Icon';
+import { Button } from './m3/Button';
+import { Dialog } from './m3/Dialog';
+import { CircularProgress } from './m3/Progress';
+import { Shape } from './m3/Shape';
+import { useSnackbar } from './m3/Snackbar';
 
 interface StatsViewProps {
   progress: UserProgress;
@@ -23,249 +19,242 @@ interface StatsViewProps {
   onStartStudy: () => void;
 }
 
-export function StatsView({
-  progress,
-  categories,
-  onResetProgress,
-  onImportProgress,
-  onStartStudy,
-}: StatsViewProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
+const BOX_LABELS = ['تازه', 'مرور ۱', 'مرور ۲', 'تثبیت', 'دائمی'];
 
-  const totalReviewed = Object.keys(progress.learnedWords).length;
-  const masteredCount = Object.values(progress.learnedWords).filter((w) => w.box >= 4).length;
-  const inProgressCount = totalReviewed - masteredCount;
-
-  // Box distribution
-  const boxCounts = [1, 2, 3, 4, 5].map(
-    (b) => Object.values(progress.learnedWords).filter((w) => w.box === b).length
+function StatTile({
+  icon,
+  label,
+  value,
+  tone,
+}: {
+  icon: string;
+  label: string;
+  value: string;
+  tone: 'success' | 'secondary' | 'tertiary' | 'primary';
+}) {
+  const tones = {
+    success: 'bg-success-container text-on-success-container',
+    secondary: 'bg-secondary-container text-on-secondary-container',
+    tertiary: 'bg-tertiary-container text-on-tertiary-container',
+    primary: 'bg-primary-container text-on-primary-container',
+  };
+  return (
+    <div className={`flex flex-col justify-between gap-6 rounded-shape-xl p-5 ${tones[tone]}`}>
+      <Icon name={icon} size={28} />
+      <div>
+        <p className="text-display-s font-bold">{value}</p>
+        <p className="text-label-l opacity-80">{label}</p>
+      </div>
+    </div>
   );
+}
 
-  const quizAccuracy =
-    progress.quizStats.totalQuestions > 0
-      ? Math.round((progress.quizStats.correctAnswers / progress.quizStats.totalQuestions) * 100)
-      : 0;
+export function StatsView({ progress, categories, onResetProgress, onImportProgress, onStartStudy }: StatsViewProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [confirmResetOpen, setConfirmResetOpen] = useState(false);
+  const showSnackbar = useSnackbar();
 
-  // Export JSON backup
+  const learned = Object.values(progress.learnedWords);
+  const totalReviewed = learned.length;
+  const masteredCount = learned.filter((w) => w.box >= 4).length;
+  const inProgressCount = totalReviewed - masteredCount;
+  const boxCounts = [1, 2, 3, 4, 5].map((b) => learned.filter((w) => w.box === b).length);
+  const maxBox = Math.max(1, ...boxCounts);
+  const quizAccuracy = progress.quizStats.totalQuestions > 0 ? progress.quizStats.correctAnswers / progress.quizStats.totalQuestions : 0;
+
+  const topCategories = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const id of Object.keys(progress.learnedWords)) {
+      const cat = id.slice(0, id.lastIndexOf('_'));
+      counts[cat] = (counts[cat] ?? 0) + 1;
+    }
+    return Object.entries(counts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 4)
+      .map(([id, count]) => ({ cat: categories.find((c) => c.id === id), count }))
+      .filter((x): x is { cat: Category; count: number } => !!x.cat);
+  }, [progress.learnedWords, categories]);
+
   const handleExport = () => {
-    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(progress, null, 2));
-    const downloadAnchor = document.createElement('a');
-    downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `farsimatrix_backup_${new Date().toISOString().slice(0, 10)}.json`);
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const blob = new Blob([JSON.stringify(progress, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `farsimatrix-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    showSnackbar('فایل پشتیبان ذخیره شد', { icon: 'download' });
   };
 
-  // Import JSON backup
   const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const parsed = JSON.parse(event.target?.result as string);
-        if (parsed && typeof parsed === 'object') {
-          onImportProgress(parsed);
-          alert('اطلاعات با موفقیت بازیابی شد.');
-        }
-      } catch (err) {
-        alert('فایل پشتیبان نامعتبر است.');
+        const imported = sanitizeImportedProgress(JSON.parse(String(event.target?.result ?? '')));
+        if (!imported) throw new Error('invalid');
+        onImportProgress(imported);
+        showSnackbar(`اطلاعات بازیابی شد — ${fa(Object.keys(imported.learnedWords).length)} واژه`, { icon: 'check_circle' });
+      } catch {
+        showSnackbar('این فایل پشتیبان معتبر نیست', { icon: 'error' });
       }
     };
     reader.readAsText(file);
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 pb-20">
-      <div>
-        <h2 className="text-2xl sm:text-3xl font-black mb-1">گزارش و پیشرفت تحصیلی من</h2>
-        <p className="text-xs sm:text-sm" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
-          اطلاعات به طور کاملاً محلی (Local) در مرورگر شما ذخیره شده و هیچ وابستگی به سرور خارجی ندارد.
-        </p>
-      </div>
-
-      {/* Main KPI Cards Grid (M3 Expressive) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        {/* Streak */}
-        <div
-          className="p-5 rounded-3xl border flex flex-col justify-between shadow-xs"
-          style={{
-            backgroundColor: 'var(--md-sys-color-surface-container-low)',
-            borderColor: 'var(--md-sys-color-outline-variant)',
-          }}
-        >
-          <div className="w-10 h-10 rounded-2xl bg-amber-500/15 flex items-center justify-center text-amber-500 mb-3">
-            <Flame className="w-5 h-5 fill-amber-500" />
-          </div>
-          <div>
-            <span className="text-xs opacity-75 font-medium block mb-1">استریک مطالعه</span>
-            <span className="text-2xl sm:text-3xl font-black">{progress.dailyStreak.count} روز</span>
+    <div className="mx-auto max-w-4xl space-y-6">
+      {/* Streak hero */}
+      <section className="relative overflow-hidden rounded-shape-xl bg-flame-container p-6 text-on-flame-container sm:p-8 animate-rise-in">
+        <Shape kind="burst" size={240} className="pointer-events-none absolute -end-16 -top-16 text-flame opacity-15" spin />
+        <div className="relative flex items-center gap-5">
+          <Shape kind="cookie9" size={80} className="text-flame">
+            <Icon name="local_fire_department" size={40} filled className="text-on-flame" />
+          </Shape>
+          <div className="min-w-0 flex-1">
+            <p className="text-label-l opacity-80">استریک مطالعه</p>
+            <p className="text-display-m font-bold leading-tight">{fa(progress.dailyStreak.count)} روز</p>
+            <p className="text-body-m opacity-80">
+              {progress.dailyStreak.count > 0 ? 'هر روز کمی مرور، زنجیره را ادامه بده!' : 'امروز اولین مرورت را شروع کن.'}
+            </p>
           </div>
         </div>
-
-        {/* Mastered Words */}
-        <div
-          className="p-5 rounded-3xl border flex flex-col justify-between shadow-xs"
-          style={{
-            backgroundColor: 'var(--md-sys-color-surface-container-low)',
-            borderColor: 'var(--md-sys-color-outline-variant)',
-          }}
-        >
-          <div className="w-10 h-10 rounded-2xl bg-emerald-500/15 flex items-center justify-center text-emerald-600 dark:text-emerald-400 mb-3">
-            <CheckCircle className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs opacity-75 font-medium block mb-1">لغات مسلط شده</span>
-            <span className="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400">
-              {masteredCount.toLocaleString('fa-IR')}
-            </span>
-          </div>
+        <div className="relative mt-5">
+          <Button icon="play_arrow" iconFilled onClick={onStartStudy} className="!bg-flame !text-on-flame">
+            شروع مرور امروز
+          </Button>
         </div>
+      </section>
 
-        {/* Words In Learning */}
-        <div
-          className="p-5 rounded-3xl border flex flex-col justify-between shadow-xs"
-          style={{
-            backgroundColor: 'var(--md-sys-color-surface-container-low)',
-            borderColor: 'var(--md-sys-color-outline-variant)',
-          }}
-        >
-          <div className="w-10 h-10 rounded-2xl bg-teal-500/15 flex items-center justify-center text-teal-600 dark:text-teal-400 mb-3">
-            <BookOpen className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs opacity-75 font-medium block mb-1">در حال یادگیری</span>
-            <span className="text-2xl sm:text-3xl font-black">
-              {inProgressCount.toLocaleString('fa-IR')}
-            </span>
-          </div>
-        </div>
-
-        {/* Quiz Accuracy */}
-        <div
-          className="p-5 rounded-3xl border flex flex-col justify-between shadow-xs"
-          style={{
-            backgroundColor: 'var(--md-sys-color-surface-container-low)',
-            borderColor: 'var(--md-sys-color-outline-variant)',
-          }}
-        >
-          <div className="w-10 h-10 rounded-2xl bg-purple-500/15 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-3">
-            <Trophy className="w-5 h-5" />
-          </div>
-          <div>
-            <span className="text-xs opacity-75 font-medium block mb-1">دقت آزمون‌ها</span>
-            <span className="text-2xl sm:text-3xl font-black">{quizAccuracy}%</span>
-          </div>
+      {/* KPI tiles */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+        <StatTile icon="workspace_premium" label="واژه‌های مسلط" value={fa(masteredCount)} tone="success" />
+        <StatTile icon="school" label="در حال یادگیری" value={fa(inProgressCount)} tone="secondary" />
+        <StatTile icon="history" label="کل مرورشده‌ها" value={fa(totalReviewed)} tone="primary" />
+        <div className="flex flex-col items-center justify-center gap-2 rounded-shape-xl bg-tertiary-container p-5 text-on-tertiary-container">
+          <CircularProgress value={quizAccuracy} size={84} thickness={8} label="دقت آزمون‌ها" indicatorClassName="text-tertiary">
+            <span className="text-title-m font-bold">{faPercent(quizAccuracy)}</span>
+          </CircularProgress>
+          <p className="text-label-l opacity-80">دقت در {fa(progress.quizStats.totalQuizzes)} آزمون</p>
         </div>
       </div>
 
-      {/* Leitner Boxes Distribution Card */}
-      <div
-        className="p-6 sm:p-8 rounded-3xl border space-y-4 shadow-xs"
-        style={{
-          backgroundColor: 'var(--md-sys-color-surface-container-low)',
-          borderColor: 'var(--md-sys-color-outline-variant)',
-        }}
-      >
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-extrabold flex items-center gap-2">
-            <Layers className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-            <span>توزیع لغات در جعبه لایتنر (۵ مرحله‌ای)</span>
+      {/* Leitner distribution */}
+      <section className="rounded-shape-xl bg-surface-container-low p-6">
+        <div className="mb-6 flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="flex items-center gap-2 text-title-l text-on-surface">
+            <Icon name="inventory_2" className="text-primary" />
+            جعبه لایتنر
           </h3>
-          <span className="text-xs opacity-70">
-            مجموع لغات در گردش: {totalReviewed.toLocaleString('fa-IR')}
-          </span>
+          <span className="text-body-m text-on-surface-variant">{fa(totalReviewed)} واژه در گردش</span>
         </div>
-
-        <div className="grid grid-cols-5 gap-2 sm:gap-4 pt-2">
+        <div className="flex h-56 items-end gap-3 sm:gap-6" role="list" aria-label="توزیع واژه‌ها در جعبه‌های لایتنر">
           {boxCounts.map((count, idx) => {
-            const boxNum = idx + 1;
-            const isMasteredBox = boxNum >= 4;
+            const height = count === 0 ? 4 : Math.max(10, (count / maxBox) * 100);
+            const mastered = idx >= 3;
             return (
-              <div
-                key={boxNum}
-                className="p-3 sm:p-4 rounded-2xl border text-center space-y-1 transition-transform hover:scale-105"
-                style={{
-                  backgroundColor: isMasteredBox
-                    ? 'var(--md-sys-color-success-container)'
-                    : 'var(--md-sys-color-surface-container)',
-                  color: isMasteredBox
-                    ? 'var(--md-sys-color-on-success-container)'
-                    : 'var(--md-sys-color-on-surface)',
-                  borderColor: 'var(--md-sys-color-outline-variant)',
-                }}
-              >
-                <span className="text-[10px] sm:text-xs block opacity-75 font-semibold">
-                  جعبه {boxNum}
-                </span>
-                <span className="text-lg sm:text-2xl font-black block">
-                  {count.toLocaleString('fa-IR')}
-                </span>
-                <span className="text-[9px] sm:text-[10px] opacity-70 block">
-                  {boxNum === 1 ? 'مقدماتی' : boxNum === 5 ? 'دائمی' : 'مرور'}
+              <div key={idx} role="listitem" className="flex h-full flex-1 flex-col items-center justify-end gap-2">
+                <span className="text-label-l text-on-surface">{fa(count)}</span>
+                <div
+                  className={`w-full max-w-16 rounded-shape-md transition-[height] duration-700 ease-spring ${
+                    mastered ? 'bg-success' : idx === 0 ? 'bg-outline-variant' : 'bg-primary'
+                  }`}
+                  style={{ height: `${height}%`, opacity: mastered ? 1 : 0.55 + idx * 0.15 }}
+                />
+                <span className="text-center text-label-m text-on-surface-variant">
+                  {fa(idx + 1)}
+                  <span className="block text-label-s">{BOX_LABELS[idx]}</span>
                 </span>
               </div>
             );
           })}
         </div>
-      </div>
+      </section>
 
-      {/* Data Backup & Privacy Section */}
-      <div
-        className="p-6 sm:p-8 rounded-3xl border space-y-4"
-        style={{
-          backgroundColor: 'var(--md-sys-color-surface-container-low)',
-          borderColor: 'var(--md-sys-color-outline-variant)',
-        }}
-      >
-        <h3 className="text-base font-extrabold">پشتیبان‌گیری و انتقال اطلاعات (حفظ کامل داده‌ها)</h3>
-        <p className="text-xs leading-relaxed" style={{ color: 'var(--md-sys-color-on-surface-variant)' }}>
-          شما می‌توانید از روند یادگیری، لغات حفظ شده و وضعیت جعبه لایتنر خود خروجی JSON بگیرید تا در مرورگر دیگر یا هر زمان دیگری آن را بازیابی کنید.
+      {/* Top categories */}
+      {topCategories.length > 0 && (
+        <section className="rounded-shape-xl bg-surface-container-low p-6">
+          <h3 className="mb-4 text-title-l text-on-surface">سرفصل‌های پرتمرین</h3>
+          <ul className="space-y-4">
+            {topCategories.map(({ cat, count }) => {
+              const ratio = Math.min(1, count / Math.max(1, cat.wordCount));
+              return (
+                <li key={cat.id}>
+                  <div className="mb-1.5 flex justify-between text-body-m">
+                    <span className="text-on-surface">{cat.title}</span>
+                    <span className="text-on-surface-variant">
+                      {fa(count)} از {fa(cat.wordCount)}
+                    </span>
+                  </div>
+                  <div className="h-3 overflow-hidden rounded-full bg-secondary-container">
+                    <div
+                      className="h-full rounded-full bg-primary transition-[width] duration-700 ease-emphasized"
+                      style={{ width: `${Math.max(2, ratio * 100)}%` }}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </section>
+      )}
+
+      {/* Backup */}
+      <section className="rounded-shape-xl bg-surface-container-low p-6">
+        <h3 className="flex items-center gap-2 text-title-l text-on-surface">
+          <Icon name="backup" className="text-primary" />
+          پشتیبان‌گیری
+        </h3>
+        <p className="mt-2 text-body-m text-on-surface-variant">
+          همه اطلاعات فقط روی همین دستگاه ذخیره می‌شود. برای انتقال به مرورگر یا دستگاه دیگر، فایل پشتیبان بگیرید.
         </p>
-
-        <div className="flex flex-wrap gap-3 pt-2">
-          <button
-            onClick={handleExport}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold shadow-xs cursor-pointer"
-            style={{
-              backgroundColor: 'var(--md-sys-color-primary)',
-              color: 'var(--md-sys-color-on-primary)',
-            }}
-          >
-            <Download className="w-4 h-4" />
-            <span>دانلود فایل پشتیبان (Export JSON)</span>
-          </button>
-
-          <button
-            onClick={() => fileInputRef.current?.click()}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-full text-xs font-bold border hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
-            style={{ borderColor: 'var(--md-sys-color-outline-variant)' }}
-          >
-            <Upload className="w-4 h-4" />
-            <span>بازیابی اطلاعات (Import JSON)</span>
-          </button>
-          <input
-            type="file"
-            ref={fileInputRef}
-            onChange={handleImportFile}
-            accept=".json"
-            className="hidden"
-          />
-
-          <button
-            onClick={() => {
-              if (confirm('آیا از بازنشانی کامل تاریخچه یادگیری اطمینان دارید؟')) {
-                onResetProgress();
-              }
-            }}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-full text-xs font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/20 cursor-pointer mr-auto"
-          >
-            <Trash2 className="w-4 h-4" />
-            <span>شروع از صفر</span>
-          </button>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Button icon="download" onClick={handleExport}>
+            دریافت فایل پشتیبان
+          </Button>
+          <Button variant="outlined" icon="upload" onClick={() => fileInputRef.current?.click()}>
+            بازیابی از فایل
+          </Button>
+          <input type="file" ref={fileInputRef} onChange={handleImportFile} accept="application/json,.json" className="hidden" />
+          <Button variant="text" icon="delete_forever" className="!text-error ms-auto" onClick={() => setConfirmResetOpen(true)}>
+            شروع از صفر
+          </Button>
         </div>
-      </div>
+      </section>
+
+      <Dialog
+        open={confirmResetOpen}
+        onClose={() => setConfirmResetOpen(false)}
+        icon="delete_forever"
+        iconClassName="text-error"
+        headline="همه پیشرفت پاک شود؟"
+        actions={
+          <>
+            <Button variant="text" onClick={() => setConfirmResetOpen(false)} data-autofocus>
+              انصراف
+            </Button>
+            <Button
+              variant="text"
+              className="!text-error"
+              onClick={() => {
+                onResetProgress();
+                setConfirmResetOpen(false);
+                showSnackbar('تاریخچه یادگیری پاک شد', { icon: 'delete_forever' });
+              }}
+            >
+              پاک کردن
+            </Button>
+          </>
+        }
+      >
+        <p className="text-center">
+          وضعیت جعبه لایتنر، واژه‌های نشان‌شده، استریک و آمار آزمون‌ها برای همیشه حذف می‌شوند. پیشنهاد می‌کنیم قبلش فایل پشتیبان بگیرید.
+        </p>
+      </Dialog>
     </div>
   );
 }

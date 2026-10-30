@@ -1,33 +1,37 @@
 {
   "name": "فارسی ماتریکس | FarsiMatrix",
   "short_name": "فارسی ماتریکس",
-  "description": "سامانه هوشمند یادگیری و مرور لغات تخصصی انگلیسی با زبان طراحی متریال دیزاین ۳ و جعبه لایتنر",
+  "description": "یادگیری و مرور هوشمند لغات تخصصی انگلیسی با جعبه لایتنر، آزمون تعاملی و طراحی متریال ۳",
+  "id": "/",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#f8fafb",
-  "theme_color": "#006874",
+  "display_override": ["window-controls-overlay", "standalone"],
+  "orientation": "any",
+  "background_color": "#f4fbfa",
+  "theme_color": "#f4fbfa",
   "dir": "rtl",
   "lang": "fa",
   "categories": ["education", "books", "productivity"],
   "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-maskable-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-maskable-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
     {
-      "src": "/icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
+      "name": "مرور فلش‌کارت",
+      "short_name": "فلش‌کارت",
+      "url": "/#/flashcard",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     },
     {
-      "src": "/icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "/icons/icon-maskable-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
+      "name": "آزمون سریع",
+      "short_name": "آزمون",
+      "url": "/#/quiz",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
     }
   ]
 }

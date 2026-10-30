@@ -1,23 +1,27 @@
 import type { Metadata, Viewport } from "next";
 import { Vazirmatn } from "next/font/google";
 import { PWARegister } from "@/components/PWARegister";
+import { RippleProvider } from "@/components/m3/RippleProvider";
+import { SnackbarProvider } from "@/components/m3/Snackbar";
+import { THEME_BOOT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 const vazirmatn = Vazirmatn({
   subsets: ["arabic", "latin"],
   variable: "--font-vazirmatn",
-  weight: ["300", "400", "500", "600", "700", "800"],
+  weight: ["400", "500", "600", "700", "800"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "فارسی ماتریکس | سامانه هوشمند یادگیری و مرور لغات انگلیسی",
-  description: "وب‌اپلیکیشن جامع یادگیری و حفظ لغات انگلیسی به فارسی با سیستم جعبه لایتنر، آزمون‌های تعاملی و دسته‌بندی‌های تخصصی",
+  title: "فارسی ماتریکس | یادگیری هوشمند لغات تخصصی انگلیسی",
+  description:
+    "یادگیری و مرور هوشمند لغات تخصصی انگلیسی به فارسی با جعبه لایتنر، آزمون تعاملی، تلفظ صوتی و طراحی متریال ۳ — کاملاً آفلاین و رایگان",
   keywords: ["دیکشنری", "فلش کارت", "لایتنر", "انگلیسی به فارسی", "یادگیری زبان", "FarsiMatrix", "احسان فضلی"],
   manifest: "/manifest.json",
   icons: {
-    icon: "/icons/icon-192x192.png",
-    apple: "/icons/icon-192x192.png",
+    icon: [{ url: "/icons/icon.svg", type: "image/svg+xml" }],
+    apple: "/icons/apple-touch-icon.png",
   },
   appleWebApp: {
     capable: true,
@@ -29,12 +33,12 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#006874" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f1415" },
+    { media: "(prefers-color-scheme: light)", color: "#f4fbfa" },
+    { media: "(prefers-color-scheme: dark)", color: "#0e1514" },
   ],
   width: "device-width",
   initialScale: 1,
-  maximumScale: 5,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
@@ -43,15 +47,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fa" dir="rtl" className={`${vazirmatn.variable} h-full antialiased`}>
+    <html lang="fa" dir="rtl" className={vazirmatn.variable} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <script dangerouslySetInnerHTML={{ __html: THEME_BOOT_SCRIPT }} />
         <meta name="mobile-web-app-capable" content="yes" />
       </head>
-      <body className="min-h-full flex flex-col font-sans transition-colors duration-200">
+      <body className="font-sans">
         <PWARegister />
-        {children}
+        <RippleProvider />
+        <SnackbarProvider>{children}</SnackbarProvider>
       </body>
     </html>
   );

@@ -47,6 +47,43 @@ export function loadUserProgress(): UserProgress {
   }
 }
 
+/** Validate an imported backup; returns null if it is not a FarsiMatrix progress file. */
+export function sanitizeImportedProgress(raw: unknown): UserProgress | null {
+  if (!raw || typeof raw !== 'object') return null;
+  const data = raw as Partial<UserProgress>;
+  if (typeof data.learnedWords !== 'object' || data.learnedWords === null || Array.isArray(data.learnedWords)) return null;
+
+  const learnedWords: UserProgress['learnedWords'] = {};
+  for (const [id, w] of Object.entries(data.learnedWords)) {
+    if (!w || typeof w !== 'object') continue;
+    const box = Number((w as WordProgress).box);
+    if (!Number.isFinite(box)) continue;
+    learnedWords[id] = {
+      box: Math.min(5, Math.max(1, Math.round(box))),
+      lastReviewed: Number((w as WordProgress).lastReviewed) || 0,
+      reviewCount: Number((w as WordProgress).reviewCount) || 0,
+      correctCount: Number((w as WordProgress).correctCount) || 0,
+      lastRating: (['easy', 'medium', 'hard'] as const).includes((w as WordProgress).lastRating)
+        ? (w as WordProgress).lastRating
+        : 'medium',
+    };
+  }
+
+  return {
+    learnedWords,
+    bookmarkedWords: Array.isArray(data.bookmarkedWords) ? data.bookmarkedWords.filter((id) => typeof id === 'string') : [],
+    dailyStreak: {
+      count: Number(data.dailyStreak?.count) || 0,
+      lastActiveDate: typeof data.dailyStreak?.lastActiveDate === 'string' ? data.dailyStreak.lastActiveDate : '',
+    },
+    quizStats: {
+      totalQuizzes: Number(data.quizStats?.totalQuizzes) || 0,
+      totalQuestions: Number(data.quizStats?.totalQuestions) || 0,
+      correctAnswers: Number(data.quizStats?.correctAnswers) || 0,
+    },
+  };
+}
+
 export function saveUserProgress(progress: UserProgress): void {
   if (typeof window === 'undefined') return;
   try {
