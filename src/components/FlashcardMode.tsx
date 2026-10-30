@@ -224,7 +224,8 @@ export function FlashcardMode({ category, words, progress, onReviewWord, onToggl
       </div>
 
       {/* 3D flip card */}
-      <div className="perspective-1200">
+      {/* Keyed by word: a new card mounts face-up, so the next word's meaning is never shown while flipping back */}
+      <div key={currentWord.id} className="perspective-1200 animate-card-in">
         <div
           role="button"
           tabIndex={0}
