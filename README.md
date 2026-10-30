@@ -1,165 +1,143 @@
-# FarsiMatrix — English ↔ Persian Dictionary API  
+# FarsiMatrix (فارسی ماتریکس) 🚀
 <div align="center">
 
 <!-- Logo SVG -->
 <svg width="120" height="120" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect rx="6" width="24" height="24" fill="#0ea5a4" />
-  <path d="M7 9h10M7 12h10M7 15h6" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect rx="6" width="24" height="24" fill="#006874" />
+  <path d="M7 9h10M7 12h10M7 15h6" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="17" cy="15" r="1.5" fill="#4dd8ec" />
 </svg>
 
-**A fast, free, and beautifully simple English–Persian dictionary API**  
-**4M+ words — 69 specialized groups — JSON output — No authentication required**
+**سامانه مدرن یادگیری، مرور زمان‌دار و حفظ لغات تخصصی انگلیسی ↔ فارسی**  
+**طراحی اختصاصی با زبان متریال دیزاین ۳ (Material Design 3 / Material You)**  
+**معماری کاملاً لوکال (Serverless & Zero DB Cost) — ۲۵۰,۰۰۰+ لغت در ۵۱ سرفصل تخصصی**
 
 </div>
 
 ---
 
 <p align="center">
-  <a href="https://farsimatrix.ehsanjs.ir"><img src="https://img.shields.io/badge/Docs-FarsiMatrix-blue.svg" alt="Docs"/></a>
-  <img src="https://img.shields.io/badge/Status-Online-green.svg" alt="Status"/>
+  <img src="https://img.shields.io/badge/Next.js-16-black?logo=next.js" alt="Next.js"/>
+  <img src="https://img.shields.io/badge/Material_Design-3-006874" alt="Material Design 3"/>
+  <img src="https://img.shields.io/badge/Tailwind_CSS-v4-38bdf8?logo=tailwind-css" alt="Tailwind"/>
+  <img src="https://img.shields.io/badge/TypeScript-Ready-blue?logo=typescript" alt="TypeScript"/>
+  <img src="https://img.shields.io/badge/DB_Cost-Zero_Dollar-success" alt="Zero Cost"/>
   <img src="https://img.shields.io/badge/License-MIT-lightgrey.svg" alt="License"/>
 </p>
 
 ---
 
-## 🎯 Quick Overview
-- **Name**: FarsiMatrix API  
-- **Purpose**: English ↔ Persian dictionary with translation & quiz generation  
-- **Database Size**: Over 4 million words  
-- **Groups**: 69 specialized categories (technical, academic, idioms, etc.)  
-- **Authentication**: None — completely free  
-- **Response Format**: JSON
+## 🎯 معرفی پروژه
+
+پروژه **فارسی ماتریکس (FarsiMatrix)** در نسخه جدید خود از یک API وابسته به دیتابیس ابری سنگین، به یک **وب‌اپلیکیشن یادگیری تعاملی، مدرن و کاملاً مستقل** تبدیل شده است. در این نسخه، هیچ‌گونه هزینه دیتابیس ابری ماهانه یا افت سرعت شبکه وجود ندارد؛ چراکه داده‌ها به شکل سرفصل‌های بهینه‌سازی‌شده در مرورگر کاربر ذخیره و پردازش می‌شوند.
 
 ---
 
-## ✨ Key Features
-- Massive multilingual database  
-- Exact or partial search modes  
-- Filter by topic-specific groups (e.g., `electronics`, `biology`, `idioms`)  
-- Quiz generator for `translation` and `multiple-choice`  
-- Clean and fast JSON responses  
-- Ready-to-use examples for Fetch, curl, or Node.js
+## ✨ ویژگی‌های کلیدی
+
+### 🎨 ۱. طراحی بر اساس متریال دیزاین ۳ (Material Design 3)
+* رعایت کامل استاندارد توکن‌های رنگی M3 (`primary`, `surface-container`, `tonal elevations`).
+* پشتیبانی روان از تم روز و شب (**Dark / Light Mode**) با تغییرات نرم رنگ‌های تونال.
+* کارت‌های شناور با گوشه‌های گرد استاندارد M3 و انیمیشن‌های فیزیکال.
+* دکمه‌های کنترلی قرصی‌شکل (Full rounded) و چیپ‌های فیلتر موضوعی (Filter Chips).
+* تایپوگرافی اصیل و خوانا با فونت محبوب **وزیرمتن (Vazirmatn)** و هماهنگی کامل فونت‌های انگلیسی.
+
+### 📚 ۲. طبقه‌بندی در ۵۱ سرفصل موضوعی و تخصصی
+* **فناوری و کامپیوتر:** کامپیوتر و انفورماتیک، الگوریتم‌ها و ساختمان داده، فناوری اطلاعات (IT)، اینترنت و وب، برنامه‌نویسی و ویژوال بیسیک، گرافیک رایانه‌ای، الکترونیک ۱، ۲ و ۳، خطاهای مودم و دامنه‌ها.
+* **آموزش زبان و مکالمه:** واژگان ضروری ۱ و ۲ (۵۰۴ و ۱۱۰۰ واژه تافل و آیلتس)، اصطلاحات و ضرب‌المثل‌ها ۱، ۲ و ۳، اصطلاحات چت و اینترنت (Chat Slang)، اصطلاحات تمثیلی و نام‌های پرکاربرد.
+* **کسب‌وکار و مدیریت:** مدیریت و رهبری ۱ و ۲، حسابداری ۱، ۲ و ۳ (مالی، حسابرسی، بانکی)، حقوق و علوم قضایی.
+* **علوم پایه و پزشکی:** ریاضیات، آمار و احتمالات ۱ و ۲، زیست‌شناسی، نجوم و فضا، دندانپزشکی، گیاهان دارویی و فوبیاها.
+* **فنی و مهندسی:** مهندسی شیمی، مهندسی صنایع، هوانوردی، مهندسی نفت ۱ و ۲، مهندسی پلیمر، نساجی و مکانیک خاک.
+* **هنر و سینما:** سینما و فیلم ۱، ۲ و ۳.
+
+### 🗂️ ۳. سیستم فلش‌کارت و جعبه لایتنر ۵ مرحله‌ای (Spaced Repetition)
+* کارت‌های ۳D تعاملی با چرخش ۱۸۰ درجه هنگام ضربه یا فشردن کلید Space.
+* **تلفظ صوتی بلادرنگ (Web Speech API):** پخش تلفظ صوتی باکیفیت و استاندارد بدون هیچ‌گونه هزینه API خارجی یا تاخیر اینترنت.
+* ثبت بازخورد ۳ سطحی: **سخت / بلد نبودم (کلید ۱)**، **متوسط (کلید ۲)**، **ساده / مسلط شدم (کلید ۳)**.
+* انتقال هوشمند لغات بین ۵ جعبه لایتنر جهت ماندگاری دائمی در حافظه بلندمدت.
+* پشتیبانی کامل از کلیدهای میانبر کیبورد (Space، 1، 2، 3، S برای تلفظ، جهت‌نماهای چپ و راست).
+
+### 🎯 ۴. آزمون و کوئیز چهارگزینه‌ای هوشمند
+* تولید سوالات چهارگزینه‌ای آنی به دو حالت: **انگلیسی به فارسی** یا **فارسی به انگلیسی**.
+* انتخاب تعداد سوالات (۱۰، ۱۵، ۲۰ یا ۳۰ سوال).
+* فیدبک بصری فوری (سبز و قرمز متریال) و ثبت نمره دقت (Accuracy).
+* بررسی لغات غلط در پایان آزمون و جشن با انیمیشن Confetti.
+
+### 📊 ۵. پیگیری پیشرفت و حفظ حریم خصوصی
+* محاسبه استریک مطالعه روزانه (Daily Streak).
+* ذخیره‌سازی ۱۰۰٪ محلی در مرورگر (LocalStorage / Cache) بدون ردگیری اطلاعات.
+* امکان خروجی گرفتن و دانلود فایل پشتیبان (Export JSON) و بازیابی مجدد (Import JSON).
 
 ---
 
-## 📚 Documentation
-Complete and interactive documentation is available at:  
-👉 **[https://farsimatrix.ehsanjs.ir](https://farsmatrix.ehsanjs.ir)**
+## 🚀 نحوه نصب و راه‌اندازی لوکال
 
----
+### پیش‌نیازها
+* Node.js نسخه 18 یا بالاتر
+* npm یا pnpm یا yarn
 
-## 📡 API Endpoints
+### مراحل اجرا:
+```bash
+# ۱. کلون ریپوزیتوری
+git clone https://github.com/TssHack/FarsiMatrix.git
+cd FarsiMatrix
 
-### Get All Groups
-**GET** `/groups`  
-Returns a list of all available word groups with their respective word counts.
+# ۲. نصب وابستگی‌ها
+npm install
 
----
+# ۳. اجرای سرور توسعه
+npm run dev
+```
 
-### Get Random Words
-**GET** `/random?group={group}&limit={limit}`
-- `group` *(optional)*: Filter by a specific group name  
-- `limit` *(optional)*: Number of words to return (default: 1)
+مرورگر خود را باز کرده و به آدرس `http://localhost:3000` بروید.
 
-**Example:**
-```js
-fetch('https://api-farsimatrix.ehsanjs.ir/random?limit=5')
-  .then(res => res.json())
-  .then(data => console.log(data));
+### بیلد پروداکشن:
+```bash
+npm run build
+npm run start
 ```
 
 ---
 
-### Search Words
-**GET** `/search?q={query}&group={group}&exact={boolean}`
-- `q` *(required)*: Search term  
-- `group` *(optional)*  
-- `exact` *(optional)*: `true` / `false` (default: `false`)
+## 🛠️ ساختار پروژه
 
-**Example:**
-```js
-fetch('https://api-farsimatrix.ehsanjs.ir/search?q=book')
-  .then(res => res.json())
-  .then(data => console.log(data));
+```
+farsimatrix/
+├── public/
+│   └── data/
+│       ├── categories.json        # مانیفست اطلاعات ۵۱ سرفصل
+│       └── groups/                # دیتابیس JSON لغات به تفکیک سرفصل
+├── src/
+│   ├── app/
+│   │   ├── globals.css            # توکن‌ها و سیستم رنگی Material Design 3
+│   │   ├── layout.tsx             # قالب اصلی، فونت وزیرمتن و تنظیمات RTL
+│   │   └── page.tsx               # صفحه اصلی و مدیریت حالت‌های یادگیری
+│   ├── components/
+│   │   ├── Navbar.tsx             # اپ‌بار متریال ۳ و نویگیشن بار موبایل
+│   │   ├── CategoryExplorer.tsx   # کاوشگر سرفصل‌ها و کارت‌های M3
+│   │   ├── FlashcardMode.tsx      # فلش‌کارت سه‌بعدی و جعبه لایتنر
+│   │   ├── QuizMode.tsx           # آزمون چهارگزینه‌ای هوشمند
+│   │   ├── WordListMode.tsx       # واژه‌نامه جامع با جستجوی آنی
+│   │   ├── StatsView.tsx          # آمار پیشرفت و پشتیبان‌گیری لوکال
+│   │   └── DynamicIcon.tsx        # نگاشت آیکون‌های متریال
+│   ├── lib/
+│   │   ├── speech.ts              # موتور تلفظ صوتی مرورگر
+│   │   └── storage.ts             # مدیریت ذخیره‌سازی محلی جعبه لایتنر
+│   └── types/
+│       └── index.ts               # تعاریف و تایپ‌های TypeScript
+└── scripts/
+    └── build_data.py              # اسکریپت استخراج و فشرده‌سازی لغات
 ```
 
 ---
 
-### Generate Quiz
-**GET** `/quiz?group={group}&limit={limit}&type={type}`
-- `group` *(optional)*  
-- `limit` *(optional)*: Number of questions (default: 10, max: 50)  
-- `type` *(optional)*: `translation` or `multiple-choice` (default: `translation`)
-
-**Example:**
-```js
-fetch('https://api-farsimatrix.ehsanjs.ir/quiz?type=multiple-choice&limit=10')
-  .then(res => res.json())
-  .then(data => console.log(data));
-```
-
----
-
-## 📂 Example Response
-```json
-{
-  "word": "book",
-  "translations": ["کتاب", "دفتر"],
-  "group": "generic-1",
-  "examples": ["I read a book.", "She bought a new book."]
-}
-```
-
----
-
-## 🧭 Use Cases
-- Language learning apps (flashcards, quizzes)
-- Educational platforms and e-learning tools
-- Translation services and content processors
-- Offline mobile dictionary applications
-- Text classification and linguistic analysis
-
----
-
-## 🧩 Example Code — Node.js (axios)
-```js
-const axios = require('axios');
-
-async function search(q) {
-  const res = await axios.get('https://api-farsimatrix.ehsanjs.ir/search', { params: { q } });
-  return res.data;
-}
-
-search('computer').then(console.log).catch(console.error);
-```
-
----
-
-## 🛠️ Implementation Tips
-- Cache `random` and `search` results to improve performance.
-- Download key word groups for offline apps.
-- For quizzes, use `limit` between 5–20 for best UX.
-
----
-
-## 🤝 Contributing
-Contributions are welcome! Please submit a Pull Request with a short description of your improvements.
-
-**Steps:**
-1. Fork the repository  
-2. Create a new branch for your changes  
-3. Submit a Pull Request
-
----
-
-## 📬 Contact
-- **Developer**: Ehsan Fazli  
-- **GitHub**: [tsshack](https://github.com/tsshack)  
-- **Telegram**: [@devehsan](https://t.me/devehsan)
+## 📬 ارتباط و مشارکت
+- **توسعه‌دهنده**: احسان فضل‌علی‌نژاد (Ehsan Fazli)
+- **گیت‌هاب**: [@tsshack](https://github.com/tsshack)
+- **تلگرام**: [@devehsan](https://t.me/devehsan)
 
 ---
 
 <div align="center">
-<small>Built with ❤️ for the Persian-speaking community — FarsiMatrix</small>
+<small>ساخته‌شده با ❤️ برای جامعه فارسی‌زبان — FarsiMatrix</small>
 </div>
-
