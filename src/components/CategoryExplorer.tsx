@@ -112,7 +112,7 @@ export function CategoryExplorer({
                 color: 'var(--md-sys-color-on-surface-variant)',
               }}
             >
-              <span>توسعه‌دهنده: احسان فضل‌علی‌نژاد</span>
+              <span>توسعه‌دهنده: احسان فضلی</span>
               <span className="text-[10px] opacity-75 font-mono">(ehsanfazli.ir)</span>
             </button>
           </div>

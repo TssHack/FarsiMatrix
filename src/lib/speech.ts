@@ -3,6 +3,7 @@
 export function playPronunciation(text: string, onEnd?: () => void): boolean {
   if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
     console.warn('Speech synthesis not supported on this platform');
+    if (onEnd) onEnd();
     return false;
   }
 
@@ -11,7 +12,10 @@ export function playPronunciation(text: string, onEnd?: () => void): boolean {
     window.speechSynthesis.cancel();
 
     const clean = text.replace(/^[.\s]+/, '').trim();
-    if (!clean) return false;
+    if (!clean) {
+      if (onEnd) onEnd();
+      return false;
+    }
 
     const utterance = new SpeechSynthesisUtterance(clean);
     utterance.lang = 'en-US';

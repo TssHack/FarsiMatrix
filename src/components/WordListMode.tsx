@@ -173,7 +173,7 @@ export function WordListMode({
                     </span>
                     <button
                       onClick={() => playPronunciation(item.word)}
-                      className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer text-teal-600 dark:text-teal-400"
+                      className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer text-teal-600 dark:text-teal-400"
                       title="پخش تلفظ صوتی"
                     >
                       <Volume2 className="w-4 h-4" />

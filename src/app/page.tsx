@@ -293,7 +293,7 @@ export default function Home() {
                 rel="noopener noreferrer"
                 className="font-bold underline hover:text-[var(--md-sys-color-primary)] transition-colors"
               >
-                احسان فضل‌علی‌نژاد (Ehsan Fazli)
+                احسان فضلی (Ehsan Fazli)
               </a>
             </p>
             <p className="text-[11px] opacity-60 mt-0.5">

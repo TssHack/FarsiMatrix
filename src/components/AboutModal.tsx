@@ -1,11 +1,11 @@
 'use client';
 
-import React from 'react';
-import { 
-  X, 
-  Globe, 
-  ExternalLink, 
-  Sparkles, 
+import React, { useEffect, useRef } from 'react';
+import {
+  X,
+  Globe,
+  ExternalLink,
+  Sparkles,
   Download,
   Heart,
   User,
@@ -35,12 +35,47 @@ export function AboutModal({
   deferredPrompt,
   onInstallPWA,
 }: AboutModalProps) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const titleId = 'about-modal-title';
+
+  // Lock body scroll, move focus into the dialog, and close on Escape while open
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previouslyFocused = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previouslyFocused?.focus?.();
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-scrim-in"
+      onMouseDown={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
       <div
-        className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 border shadow-xl max-h-[90vh] overflow-y-auto space-y-6"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="relative w-full max-w-lg rounded-3xl p-6 sm:p-8 border shadow-xl max-h-[90vh] overflow-y-auto space-y-6 animate-dialog-in"
         style={{
           backgroundColor: 'var(--md-sys-color-surface-container)',
           borderColor: 'var(--md-sys-color-outline-variant)',
@@ -48,8 +83,9 @@ export function AboutModal({
       >
         {/* Close Button */}
         <button
+          ref={closeButtonRef}
           onClick={onClose}
-          className="absolute top-5 left-5 p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
+          className="absolute top-5 left-5 w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer transition-colors"
           aria-label="بستن"
         >
           <X className="w-5 h-5" />
@@ -64,10 +100,10 @@ export function AboutModal({
               color: 'var(--md-sys-color-on-primary)',
             }}
           >
-            <Sparkles className="w-6 h-6 animate-pulse" />
+            <Sparkles className="w-6 h-6" />
           </div>
           <div>
-            <h3 className="text-xl font-extrabold">درباره فارسی ماتریکس</h3>
+            <h3 id={titleId} className="text-xl font-extrabold">درباره فارسی ماتریکس</h3>
             <p className="text-xs font-medium opacity-70">
               سامانه هوشمند یادگیری لغات و جعبه لایتنر با متریال دیزاین ۳
             </p>
@@ -105,7 +141,7 @@ export function AboutModal({
 
           <div className="flex items-center justify-between">
             <div>
-              <h4 className="text-base font-extrabold">احسان فضل‌علی‌نژاد (Ehsan Fazli)</h4>
+              <h4 className="text-base font-extrabold">احسان فضلی (Ehsan Fazli)</h4>
               <p className="text-xs opacity-75 mt-0.5">طراح سیستم و توسعه‌دهنده نرم‌افزار</p>
             </div>
             <a

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Word, Category, UserProgress, ReviewRating } from '@/types';
 import { playPronunciation } from '@/lib/speech';
 import { 
@@ -41,7 +41,7 @@ export function FlashcardMode({
   const [isFlipped, setIsFlipped] = useState(false);
   const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [autoPlayAudio, setAutoPlayAudio] = useState(true);
-  const [shuffledIndices, setShuffledIndices] = useState<number[]>([]);
+  const pendingNextWordIdRef = useRef<string | null>(null);
 
   // Filter words
   const activeWords = useMemo(() => {
@@ -58,11 +58,15 @@ export function FlashcardMode({
     return words;
   }, [words, filterMode, progress.bookmarkedWords, progress.learnedWords]);
 
-  // Shuffle or order indices
-  useEffect(() => {
+  // Reset to the first card whenever the filter or category changes. Adjusted during
+  // render (React's recommended pattern) instead of in an effect, to avoid an extra render pass.
+  const resetKey = `${category.id}:${filterMode}`;
+  const [prevResetKey, setPrevResetKey] = useState(resetKey);
+  if (prevResetKey !== resetKey) {
+    setPrevResetKey(resetKey);
     setCurrentIndex(0);
     setIsFlipped(false);
-  }, [filterMode, category.id]);
+  }
 
   const currentWord: Word | undefined = activeWords[currentIndex];
   const wordProg = currentWord ? progress.learnedWords[currentWord.id] : undefined;
@@ -105,11 +109,25 @@ export function FlashcardMode({
     }
   }, [currentIndex, activeWords.length]);
 
+  // Rating a word (e.g. "easy") can remove it from a filtered list (need_review/bookmarked)
+  // right as we advance. Record the *word id* that should come next before the list shrinks,
+  // so the following card isn't skipped by a stale index -> see effect below.
   const handleRating = useCallback((rating: ReviewRating) => {
     if (!currentWord) return;
+    pendingNextWordIdRef.current =
+      activeWords.length > 1 ? activeWords[(currentIndex + 1) % activeWords.length].id : null;
     onReviewWord(currentWord.id, rating);
-    handleNext();
-  }, [currentWord, onReviewWord, handleNext]);
+    setIsFlipped(false);
+  }, [currentWord, activeWords, currentIndex, onReviewWord]);
+
+  // Resolve the pending "next word" by id once the (possibly shrunk) filtered list updates.
+  useEffect(() => {
+    if (pendingNextWordIdRef.current === null) return;
+    const targetId = pendingNextWordIdRef.current;
+    pendingNextWordIdRef.current = null;
+    const idx = activeWords.findIndex((w) => w.id === targetId);
+    setCurrentIndex(idx >= 0 ? idx : 0);
+  }, [activeWords]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -387,7 +405,7 @@ export function FlashcardMode({
                     e.stopPropagation();
                     speakCurrentWord();
                   }}
-                  className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+                  className="p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
                 >
                   <Volume2 className="w-4 h-4" style={{ color: 'var(--md-sys-color-primary)' }} />
                 </button>

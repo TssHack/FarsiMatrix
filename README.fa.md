@@ -129,7 +129,7 @@ npm run start
 
 ## 👨‍💻 سازنده و توسعه‌دهنده
 
-* **توسعه‌دهنده**: **احسان فضل‌علی‌نژاد (Ehsan Fazli)**
+* **توسعه‌دهنده**: **احسان فضلی (Ehsan Fazli)**
 * **وب‌سایت شخصی**: [ehsanfazli.ir](https://ehsanfazli.ir)
 * **گیت‌هاب**: [@tsshack](https://github.com/tsshack)
 * **تلگرام**: [@devehsan](https://t.me/devehsan)

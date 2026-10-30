@@ -167,7 +167,7 @@ farsimatrix/
 
 ## 👨‍💻 Author & Developer
 
-- **Developer**: **Ehsan Fazli** (احسان فضل‌علی‌نژاد)
+- **Developer**: **Ehsan Fazli** (احسان فضلی)
 - **Website**: [ehsanfazli.ir](https://ehsanfazli.ir)
 - **GitHub**: [@tsshack](https://github.com/tsshack)
 - **Telegram**: [@devehsan](https://t.me/devehsan)

@@ -74,7 +74,7 @@ export function Navbar({
                 color: 'var(--md-sys-color-on-primary)',
               }}
             >
-              <Sparkles className="w-5 h-5 animate-pulse" />
+              <Sparkles className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-1.5 sm:gap-2">
@@ -139,7 +139,7 @@ export function Navbar({
                 backgroundColor: 'var(--md-sys-color-surface-container-low)',
                 color: 'var(--md-sys-color-on-surface)',
               }}
-              title="وب‌سایت شخصی احسان فضل‌علی‌نژاد"
+              title="وب‌سایت شخصی احسان فضلی"
             >
               <Globe className="w-3.5 h-3.5 text-teal-600 dark:text-teal-400" />
               <span>ehsanfazli.ir</span>
@@ -173,7 +173,7 @@ export function Navbar({
               title={`استریک مطالعه روزانه: ${progress.dailyStreak.count} روز | ${masteredCount} لغت مسلط شده`}
               onClick={() => setActiveTab('stats')}
             >
-              <Flame className="w-4 h-4 text-amber-500 fill-amber-500 animate-bounce" />
+              <Flame className="w-4 h-4 text-amber-500 fill-amber-500" />
               <span>{progress.dailyStreak.count} روز</span>
             </div>
 
@@ -187,7 +187,7 @@ export function Navbar({
                 backgroundColor: 'var(--md-sys-color-surface-container)',
               }}
               aria-label="درباره نرم‌افزار و توسعه‌دهنده"
-              title="درباره و اطلاعات توسعه‌دهنده (احسان فضل‌علی‌نژاد)"
+              title="درباره و اطلاعات توسعه‌دهنده (احسان فضلی)"
             >
               <Info className="w-4 h-4" />
             </button>
